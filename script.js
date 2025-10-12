@@ -53,7 +53,8 @@ const checkoutFields = {
     firstName: document.getElementById('checkoutFirstName'),
     address: document.getElementById('checkoutAddress'),
     city: document.getElementById('checkoutCity'),
-    phone: document.getElementById('checkoutPhone')
+    phone: document.getElementById('checkoutPhone'),
+    paymentMethod: document.getElementById('checkoutPaymentMethod')
 };
 
 /**
@@ -62,13 +63,18 @@ const checkoutFields = {
  */
 const VALIDATION_PATTERNS = {
     email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-    phone: /^\d{3}\s\d{3}\s\d{2}\s\d{2}$/,
+    phone: /^\d{3}(?:\s?\d{3})(?:\s?\d{2}){2}$/,
     name: /^[a-zA-ZÀ-ÿ\s'-]{2,50}$/
 };
 
 const CHECKOUT_PATTERNS = {
     name: VALIDATION_PATTERNS.name,
-    phone: /^\d{3}\s\d{3}\s\d{2}\s\d{2}$/
+    phone: VALIDATION_PATTERNS.phone
+};
+const PAYMENT_LABELS = {
+    cash: 'Cash',
+    card: 'Carte bancaire',
+    twint: 'Twint'
 };
 const MIN_ORDER_TOTAL = 15;
 
@@ -79,7 +85,7 @@ const MIN_ORDER_TOTAL = 15;
 const ERROR_MESSAGES = {
     required: 'Ce champ est obligatoire',
     invalidEmail: 'Veuillez entrer une adresse email valide',
-    invalidPhone: 'Veuillez entrer un numéro au format XXX XXX XX XX (ex: 078 123 45 67)',
+    invalidPhone: 'Veuillez entrer un numéro à 10 chiffres (ex: 0781234567 ou 078 123 45 67)',
     invalidName: 'Veuillez entrer un nom valide',
     invalidSubject: 'Veuillez sélectionner un sujet',
     shortMessage: 'Le message doit contenir au moins 10 caractères'
@@ -298,8 +304,6 @@ class FormValidator {
                 break;
                 
             case 'phone':
-                // Nettoyer le numéro de téléphone (retirer espaces, points, tirets)
-                const cleanPhone = value.replace(/[\s.-]/g, '');
                 if (!VALIDATION_PATTERNS.phone.test(value)) {
                     isValid = false;
                     errorMessage = ERROR_MESSAGES.invalidPhone;
@@ -791,7 +795,8 @@ class ShoppingCart {
             firstName: checkoutFields.firstName.value.trim(),
             address: checkoutFields.address.value.trim(),
             city: checkoutFields.city.value.trim(),
-            phone: checkoutFields.phone.value.trim()
+            phone: checkoutFields.phone.value.trim(),
+            paymentMethod: checkoutFields.paymentMethod.value
         };
 
         const orderSummary = this.items.map(item =>
@@ -801,7 +806,8 @@ class ShoppingCart {
         const customerSummary =
             `👤 Client : ${customer.firstName} ${customer.lastName}\n` +
             `🏠 Adresse : ${customer.address}, ${customer.city}\n` +
-            `📞 Téléphone : ${customer.phone}`;
+            `📞 Téléphone : ${customer.phone}\n` +
+            `💳 Paiement : ${PAYMENT_LABELS[customer.paymentMethod] || '—'}`;
 
         const confirmMessage =
             `${customerSummary}\n\n🍽️ Commande :\n${orderSummary}\n\n` +
@@ -809,6 +815,15 @@ class ShoppingCart {
 
         if (confirm(confirmMessage)) {
             alert('🎉 Commande confirmée ! \nVotre commande sera prête dans 15-20 minutes.\nMerci de votre confiance !');
+            Object.values(checkoutFields).forEach(field => {
+                if (!field) return;
+                if (field.tagName === 'SELECT') {
+                    field.selectedIndex = 0;
+                } else {
+                    field.value = '';
+                }
+                field.classList.remove('checkout-error');
+            });
             
             // Vider le panier
             this.clearCart();
@@ -832,7 +847,8 @@ class ShoppingCart {
             firstName: checkoutFields.firstName?.value.trim(),
             address: checkoutFields.address?.value.trim(),
             city: checkoutFields.city?.value.trim(),
-            phone: checkoutFields.phone?.value.trim()
+            phone: checkoutFields.phone?.value.trim(),
+            paymentMethod: checkoutFields.paymentMethod?.value.trim()
         };
 
         let isValid = true;
@@ -845,6 +861,7 @@ class ShoppingCart {
             const patternInvalid =
                 key === 'phone' ? !CHECKOUT_PATTERNS.phone.test(value) :
                 (key === 'lastName' || key === 'firstName') ? !CHECKOUT_PATTERNS.name.test(value) :
+                key === 'paymentMethod' ? value === '' :
                 false;
 
             if (baseInvalid || patternInvalid) {
