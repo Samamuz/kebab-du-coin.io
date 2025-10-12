@@ -753,9 +753,25 @@ img {
 .social-link {
     font-size: 1.5rem;
     transition: transform var(--transition-speed);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+.social-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    fill: currentColor;
+    transition: transform var(--transition-speed);
 }
 
 .social-link:hover {
+    transform: scale(1.2);
+}
+
+.social-link:hover .social-icon {
     transform: scale(1.2);
 }
 
@@ -985,8 +1001,8 @@ img {
 
 /* Bouton petit pour les items compacts */
 .btn-small {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-small);
 }
 
 /* Animation d'ajout au panier */
@@ -1923,9 +1939,25 @@ img {
 .social-link {
     font-size: 1.5rem;
     transition: transform var(--transition-speed);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+.social-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    fill: currentColor;
+    transition: transform var(--transition-speed);
 }
 
 .social-link:hover {
+    transform: scale(1.2);
+}
+
+.social-link:hover .social-icon {
     transform: scale(1.2);
 }
 
@@ -2155,8 +2187,8 @@ img {
 
 /* Bouton petit pour les items compacts */
 .btn-small {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-small);
 }
 
 /* Animation d'ajout au panier */
@@ -2368,4 +2400,45 @@ img {
 
 .cart-total {
     margin-top: var(--spacing-md);
+}
+
+.payment-methods {
+    margin-top: var(--spacing-md);
+    display: grid;
+    gap: var(--spacing-sm);
+}
+
+.payment-methods-label {
+    font-weight: 600;
+    color: var(--color-secondary);
+}
+
+.payment-methods-buttons {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.payment-method-button {
+    flex: 1 1 140px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 2px solid var(--color-accent);
+    border-radius: var(--border-radius);
+    background: var(--color-white);
+    color: var(--color-secondary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+}
+
+.payment-method-button:hover {
+    background: var(--color-beige);
+    transform: translateY(-1px);
+}
+
+.payment-method-button.active {
+    background: var(--color-accent);
+    color: var(--color-white);
+    border-color: var(--color-primary-dark);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
