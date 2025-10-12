@@ -1,0 +1,1186 @@
+/*
+ * ========================================
+ * FEUILLE DE STYLE - LE KEBAB DU CAMPUS
+ * ========================================
+ * 
+ * Ce fichier CSS utilise une approche mobile-first :
+ * - Les styles de base sont conçus pour mobile
+ * - Les media queries ajoutent des styles pour tablettes et desktop
+ * 
+ * Organisation du fichier :
+ * 1. Reset CSS et styles de base
+ * 2. Variables CSS (couleurs, espacements, typographie)
+ * 3. Styles globaux
+ * 4. Header et navigation
+ * 5. Section Hero
+ * 6. Section Menu
+ * 7. Section Contact
+ * 8. Footer
+ * 9. Media queries pour le responsive
+ */
+
+/* ========================================
+   1. RESET CSS ET STYLES DE BASE
+   ======================================== */
+
+/* 
+ * Reset CSS basique pour uniformiser l'affichage sur tous les navigateurs
+ * Alternative : on pourrait utiliser normalize.css pour plus de compatibilité
+ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Facilite le calcul des dimensions (padding inclus) */
+}
+
+/* 
+ * Désactivation du smooth scroll pour ceux qui préfèrent les mouvements réduits
+ * (accessibilité - respect des préférences utilisateur)
+ */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ========================================
+   2. VARIABLES CSS (CUSTOM PROPERTIES)
+   ======================================== */
+
+/* 
+ * Les variables CSS permettent de centraliser les valeurs réutilisées
+ * Avantages : maintenance facilitée, cohérence visuelle, thèmes dynamiques possibles
+ */
+:root {
+    /* PALETTE DE COULEURS - Thème chaud et accueillant */
+    --color-primary: #E67E22;      /* Orange (kebab, chaleur) */
+    --color-primary-dark: #D35400;  /* Orange foncé (hover, accents) */
+    --color-secondary: #8B4513;     /* Marron (authenticité) */
+    --color-accent: #F39C12;        /* Orangé vif (call-to-action) */
+    
+    /* Couleurs neutres */
+    --color-dark: #2C3E50;          /* Texte principal */
+    --color-light: #ECF0F1;         /* Arrière-plan clair */
+    --color-white: #FFFFFF;         /* Blanc pur */
+    --color-beige: #F5E6D3;         /* Beige (douceur) */
+    
+    /* Couleurs de feedback */
+    --color-success: #27AE60;       /* Vert pour succès */
+    --color-error: #E74C3C;         /* Rouge pour erreurs */
+    
+    /* TYPOGRAPHIE */
+    --font-family-base: 'Funnel Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-family-heading: 'Funnel Sans', 'Georgia', serif;
+    
+    --font-size-small: 0.875rem;    /* 14px */
+    --font-size-base: 1rem;         /* 16px */
+    --font-size-medium: 1.125rem;   /* 18px */
+    --font-size-large: 1.5rem;      /* 24px */
+    --font-size-xlarge: 2rem;       /* 32px */
+    --font-size-xxlarge: 2.5rem;    /* 40px */
+    
+    /* ESPACEMENTS - Système d'espacement cohérent basé sur 8px */
+    --spacing-xs: 0.5rem;   /* 8px */
+    --spacing-sm: 1rem;     /* 16px */
+    --spacing-md: 1.5rem;   /* 24px */
+    --spacing-lg: 2rem;     /* 32px */
+    --spacing-xl: 3rem;     /* 48px */
+    --spacing-xxl: 4rem;    /* 64px */
+    
+    /* AUTRES VALEURS */
+    --border-radius: 8px;
+    --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    --transition-speed: 0.3s;
+    
+    /* Largeur maximale du contenu */
+    --container-width: 1200px;
+}
+
+/* ========================================
+   3. STYLES GLOBAUX
+   ======================================== */
+
+/* 
+ * Activation du smooth scroll pour la navigation entre sections
+ * Améliore l'expérience utilisateur lors du clic sur les liens d'ancre
+ */
+html {
+    scroll-behavior: smooth;
+}
+
+/* 
+ * Styles de base pour le body
+ * Font-size en 16px par défaut (1rem = 16px)
+ */
+body {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-base);
+    line-height: 1.6; /* Espacement entre les lignes pour la lisibilité */
+    color: var(--color-dark);
+    background-color: var(--color-white);
+    overflow-x: hidden; /* Empêche le scroll horizontal */
+}
+
+/* Styles des titres - utilisation d'une police serif pour l'élégance */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-family-heading);
+    line-height: 1.2;
+    color: var(--color-secondary);
+    margin-bottom: var(--spacing-sm);
+}
+
+/* Styles des liens */
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color var(--transition-speed);
+}
+
+a:hover {
+    color: var(--color-primary-dark);
+}
+
+/* Styles des images - responsive par défaut */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* 
+ * Container : classe utilitaire pour centrer et limiter la largeur du contenu
+ * Utilisation du padding pour les marges internes sur mobile
+ */
+.container {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 0 var(--spacing-sm);
+}
+
+/* ========================================
+   4. HEADER ET NAVIGATION
+   ======================================== */
+
+/* 
+ * Header fixe en haut de page
+ * Position fixed permet de garder la navigation visible lors du scroll
+ */
+.header {
+    background-color: var(--color-white);
+    box-shadow: var(--box-shadow);
+    position: fixed; /* Reste en haut lors du scroll */
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000; /* Au-dessus des autres éléments */
+    transition: transform var(--transition-speed);
+}
+
+/* Navigation flexible */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) 0;
+}
+
+/* Logo avec icône et texte */
+.logo {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-large);
+    font-weight: bold;
+    color: var(--color-primary);
+}
+
+.logo-icon {
+    font-size: 2rem;
+}
+
+/* 
+ * Menu de navigation
+ * Par défaut caché sur mobile, visible via le bouton hamburger
+ */
+.nav-menu {
+    list-style: none;
+    display: flex;
+    gap: var(--spacing-md);
+    
+    /* Mobile : menu caché par défaut, affiché en colonne */
+    position: fixed;
+    top: 70px;
+    right: -100%; /* Hors écran à droite */
+    width: 70%;
+    max-width: 300px;
+    height: calc(100vh - 70px);
+    background-color: var(--color-white);
+    flex-direction: column;
+    padding: var(--spacing-lg);
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+    transition: right var(--transition-speed);
+    z-index: 999;
+}
+
+/* Menu ouvert sur mobile (classe ajoutée par JavaScript) */
+.nav-menu.active {
+    right: 0;
+}
+
+.nav-link {
+    color: var(--color-dark);
+    font-weight: 500;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius);
+    transition: all var(--transition-speed);
+}
+
+.nav-link:hover {
+    background-color: var(--color-light);
+    color: var(--color-primary);
+}
+
+/* 
+ * Bouton hamburger pour mobile
+ * Composé de 3 barres empilées créées avec ::before, l'élément et ::after
+ */
+.nav-toggle {
+    display: block; /* Visible uniquement sur mobile */
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--spacing-xs);
+}
+
+.hamburger,
+.hamburger::before,
+.hamburger::after {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background-color: var(--color-primary);
+    border-radius: 3px;
+    transition: all var(--transition-speed);
+}
+
+.hamburger {
+    position: relative;
+}
+
+.hamburger::before,
+.hamburger::after {
+    content: '';
+    position: absolute;
+    left: 0;
+}
+
+.hamburger::before {
+    top: -8px;
+}
+
+.hamburger::after {
+    bottom: -8px;
+}
+
+/* Animation du hamburger en X quand le menu est ouvert */
+.nav-toggle.active .hamburger {
+    background-color: transparent;
+}
+
+.nav-toggle.active .hamburger::before {
+    top: 0;
+    transform: rotate(45deg);
+}
+
+.nav-toggle.active .hamburger::after {
+    bottom: 0;
+    transform: rotate(-45deg);
+}
+
+/* ========================================
+   5. SECTION HERO (ACCUEIL)
+   ======================================== */
+
+/* 
+ * Section d'accueil avec image de fond et texte centré
+ * Position relative pour positionner l'overlay absolument
+ */
+.hero {
+    position: relative;
+    min-height: 100vh; /* Prend toute la hauteur de l'écran */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--color-white);
+    padding-top: 70px; /* Compensation pour le header fixe */
+    
+    /* Image de fond avec overlay pour lisibilité du texte */
+    background: 
+        linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+        url('images/hero-bg.png');
+    /* Fallback gradient si l'image ne charge pas */
+    background-color: var(--color-primary);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed; /* Effet parallax */
+}
+
+/* Overlay sombre pour améliorer la lisibilité du texte */
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1;
+}
+
+/* Contenu hero au-dessus de l'overlay */
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+}
+
+.hero-title {
+    font-size: var(--font-size-xxlarge);
+    color: var(--color-white);
+    margin-bottom: var(--spacing-md);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.hero-subtitle {
+    font-size: var(--font-size-large);
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-beige);
+}
+
+.hero-description {
+    font-size: var(--font-size-medium);
+    margin-bottom: var(--spacing-lg);
+    line-height: 1.8;
+}
+
+/* ========================================
+   6. BOUTONS (COMPOSANTS RÉUTILISABLES)
+   ======================================== */
+
+/* 
+ * Classe de base pour tous les boutons
+ * Principe DRY (Don't Repeat Yourself)
+ */
+.btn {
+    display: inline-block;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    text-decoration: none;
+}
+
+/* Bouton principal avec couleur accent */
+.btn-primary {
+    background-color: var(--color-accent);
+    color: var(--color-white);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary:hover {
+    background-color: var(--color-primary-dark);
+    transform: translateY(-2px); /* Effet de soulèvement */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+    color: var(--color-white);
+}
+
+/* Bouton pleine largeur pour mobile */
+.btn-block {
+    width: 100%;
+    display: block;
+}
+
+/* ========================================
+   7. SECTIONS GÉNÉRALES
+   ======================================== */
+
+/* Espacement vertical entre les sections */
+.menu-section,
+.contact-section {
+    padding: var(--spacing-xxl) 0;
+}
+
+/* Alternance de couleurs de fond pour différencier les sections */
+.menu-section {
+    background-color: var(--color-white);
+}
+
+.contact-section {
+    background-color: var(--color-beige);
+}
+
+/* En-tête de section centré */
+.section-header {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.section-title {
+    font-size: var(--font-size-xlarge);
+    color: var(--color-secondary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.section-description {
+    font-size: var(--font-size-medium);
+    color: var(--color-dark);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ========================================
+   8. SECTION MENU
+   ======================================== */
+
+/* Catégorie de menu */
+.menu-category {
+    margin-bottom: var(--spacing-xl);
+}
+
+.category-title {
+    font-size: var(--font-size-large);
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-xs);
+    border-bottom: 3px solid var(--color-primary);
+}
+
+/* 
+ * Grille de produits utilisant CSS Grid
+ * Mobile : 1 colonne, adapté aux petits écrans
+ */
+.menu-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* 1 colonne sur mobile */
+    gap: var(--spacing-md);
+}
+
+/* Grille à 4 colonnes pour petits items (ajustée en responsive) */
+.menu-grid-4 {
+    grid-template-columns: 1fr;
+}
+
+/* 
+ * Carte de produit
+ * Box-shadow pour effet de profondeur
+ */
+.menu-item {
+    background-color: var(--color-white);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+    position: relative;
+}
+
+/* Effet hover sur les cartes */
+.menu-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Mise en avant pour item populaire */
+.menu-item-highlight {
+    border: 2px solid var(--color-accent);
+    background: linear-gradient(135deg, var(--color-white) 0%, var(--color-beige) 100%);
+}
+
+/* Badge "Populaire" */
+.badge {
+    position: absolute;
+    top: var(--spacing-xs);
+    right: var(--spacing-xs);
+    background-color: var(--color-accent);
+    color: var(--color-white);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: var(--font-size-small);
+    font-weight: bold;
+}
+
+/* En-tête d'item avec nom et prix */
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: var(--spacing-xs);
+}
+
+.item-name {
+    font-size: var(--font-size-medium);
+    color: var(--color-secondary);
+    flex: 1;
+}
+
+.item-price {
+    font-size: var(--font-size-medium);
+    font-weight: bold;
+    color: var(--color-primary);
+    white-space: nowrap; /* Empêche le prix de se couper */
+    margin-left: var(--spacing-sm);
+}
+
+.item-description {
+    font-size: var(--font-size-small);
+    color: #666;
+    line-height: 1.5;
+}
+
+/* Petits items pour accompagnements/boissons */
+.menu-item-small {
+    padding: var(--spacing-sm);
+}
+
+.menu-item-small .item-name {
+    font-size: var(--font-size-base);
+}
+
+.menu-item-small .item-price {
+    font-size: var(--font-size-base);
+}
+
+/* ========================================
+   9. SECTION CONTACT
+   ======================================== */
+
+/* 
+ * Layout à 2 colonnes (mobile : 1 colonne)
+ * Utilisation de flexbox pour la disposition
+ */
+.contact-wrapper {
+    display: flex;
+    flex-direction: column; /* Colonne sur mobile */
+    gap: var(--spacing-xl);
+}
+
+/* Informations de contact */
+.contact-info {
+    flex: 1;
+}
+
+.contact-info-title,
+.contact-form-title {
+    font-size: var(--font-size-large);
+    margin-bottom: var(--spacing-md);
+    color: var(--color-secondary);
+}
+
+.info-item {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.info-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0; /* Empêche l'icône de rétrécir */
+}
+
+.info-content h4 {
+    color: var(--color-primary);
+    margin-bottom: 0.25rem;
+}
+
+.info-content p {
+    color: var(--color-dark);
+    line-height: 1.6;
+}
+
+.info-content a {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+/* Formulaire de contact */
+.contact-form-wrapper {
+    flex: 1;
+    background-color: var(--color-white);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+/* 
+ * Groupe de champ de formulaire
+ * Chaque champ est isolé pour faciliter le styling et les messages d'erreur
+ */
+.form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    font-weight: 600;
+    color: var(--color-secondary);
+}
+
+.required {
+    color: var(--color-error);
+}
+
+/* 
+ * Champs de saisie
+ * Styles uniformes pour input, select et textarea
+ */
+.form-input {
+    width: 100%;
+    padding: var(--spacing-sm);
+    border: 2px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-base);
+    font-family: inherit;
+    transition: border-color var(--transition-speed);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.1);
+}
+
+/* Zone de texte spécifique */
+.form-textarea {
+    resize: vertical; /* Permet uniquement le redimensionnement vertical */
+    min-height: 120px;
+}
+
+/* États d'erreur et de succès */
+.form-input.error {
+    border-color: var(--color-error);
+}
+
+.form-input.success {
+    border-color: var(--color-success);
+}
+
+/* Messages d'erreur (affichés par JavaScript) */
+.form-error {
+    display: block;
+    color: var(--color-error);
+    font-size: var(--font-size-small);
+    margin-top: 0.25rem;
+    min-height: 1.25rem; /* Réserve l'espace même quand vide */
+}
+
+/* Message de succès global */
+.form-success {
+    display: none; /* Caché par défaut */
+    background-color: var(--color-success);
+    color: var(--color-white);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-md);
+    text-align: center;
+}
+
+.form-success.show {
+    display: block;
+}
+
+/* ========================================
+   10. FOOTER
+   ======================================== */
+
+.footer {
+    background-color: var(--color-secondary);
+    color: var(--color-white);
+    padding: var(--spacing-xl) 0 var(--spacing-md);
+}
+
+/* Grille du footer */
+.footer-content {
+    display: grid;
+    grid-template-columns: 1fr; /* 1 colonne sur mobile */
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.footer-title {
+    color: var(--color-accent);
+    font-size: var(--font-size-medium);
+    margin-bottom: var(--spacing-sm);
+}
+
+.footer-text {
+    line-height: 1.6;
+    color: var(--color-light);
+}
+
+/* Liste de liens du footer */
+.footer-links {
+    list-style: none;
+}
+
+.footer-links li {
+    margin-bottom: var(--spacing-xs);
+}
+
+.footer-links a {
+    color: var(--color-light);
+    transition: color var(--transition-speed);
+}
+
+.footer-links a:hover {
+    color: var(--color-accent);
+}
+
+/* Liens réseaux sociaux */
+.social-links {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.social-link {
+    font-size: 1.5rem;
+    transition: transform var(--transition-speed);
+}
+
+.social-link:hover {
+    transform: scale(1.2);
+}
+
+/* Bas du footer */
+.footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    padding-top: var(--spacing-md);
+    text-align: center;
+    color: var(--color-light);
+    font-size: var(--font-size-small);
+}
+
+.footer-note {
+    margin-top: var(--spacing-xs);
+    font-style: italic;
+    opacity: 0.8;
+}
+
+/* ========================================
+   11. SHOPPING CART SYSTEM
+   ======================================== */
+
+/* Section du panier */
+.cart-section {
+    background-color: var(--color-light);
+    padding: var(--spacing-lg) 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Wrapper du panier */
+.cart-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: var(--color-white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+}
+
+/* En-tête du panier */
+.cart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    color: var(--color-white);
+}
+
+.cart-title {
+    margin: 0;
+    font-size: var(--font-size-large);
+    font-weight: 600;
+}
+
+/* Bouton toggle du panier */
+.cart-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid var(--color-white);
+    color: var(--color-white);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    font-weight: 600;
+    min-width: 60px;
+}
+
+.cart-toggle:hover {
+    background: var(--color-white);
+    color: var(--color-primary);
+    transform: scale(1.05);
+}
+
+.cart-count {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+/* Contenu du panier */
+.cart-content {
+    padding: var(--spacing-md);
+}
+
+/* Liste des articles */
+.cart-items {
+    margin-bottom: var(--spacing-md);
+}
+
+.cart-empty {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    margin: var(--spacing-lg) 0;
+}
+
+/* Article individuel dans le panier */
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--color-light);
+}
+
+.cart-item:last-child {
+    border-bottom: none;
+}
+
+.cart-item-info {
+    flex: 1;
+}
+
+.cart-item-name {
+    font-weight: 600;
+    color: var(--color-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.cart-item-price {
+    font-size: var(--font-size-small);
+    color: var(--color-primary);
+    font-weight: 500;
+}
+
+/* Contrôles de quantité */
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-left: var(--spacing-sm);
+}
+
+.quantity-btn {
+    background: var(--color-primary);
+    color: var(--color-white);
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all var(--transition-speed);
+}
+
+.quantity-btn:hover {
+    background: var(--color-primary-dark);
+    transform: scale(1.1);
+}
+
+.quantity-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.quantity-display {
+    font-weight: 600;
+    min-width: 30px;
+    text-align: center;
+    padding: 0.25rem 0.5rem;
+    background: var(--color-light);
+    border-radius: var(--border-radius);
+}
+
+.remove-item {
+    background: var(--color-error);
+    color: var(--color-white);
+    border: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: var(--font-size-small);
+    transition: all var(--transition-speed);
+    margin-left: var(--spacing-sm);
+}
+
+.remove-item:hover {
+    background: #c0392b;
+    transform: scale(1.05);
+}
+
+/* Résumé du panier */
+.cart-summary {
+    border-top: 2px solid var(--color-light);
+    padding-top: var(--spacing-md);
+    margin-top: var(--spacing-md);
+}
+
+.cart-total {
+    font-size: var(--font-size-large);
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-sm);
+    background: var(--color-beige);
+    border-radius: var(--border-radius);
+    color: var(--color-secondary);
+}
+
+/* Boutons "Ajouter au panier" */
+.btn-add-to-cart {
+    background: var(--color-accent);
+    color: var(--color-white);
+    border: none;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    margin-top: var(--spacing-xs);
+    width: 100%;
+    font-family: inherit;
+}
+
+.btn-add-to-cart:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-add-to-cart:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Bouton petit pour les items compacts */
+.btn-small {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+/* Animation d'ajout au panier */
+.btn-add-to-cart.adding {
+    background: var(--color-success);
+    transform: scale(0.95);
+}
+
+.btn-add-to-cart.adding::after {
+    content: " ✓";
+}
+
+/* Effet de feedback visuel */
+.cart-bounce {
+    animation: cartBounce 0.3s ease-in-out;
+}
+
+@keyframes cartBounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* Badge de notification sur le panier */
+.cart-notification {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: var(--color-error);
+    color: var(--color-white);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* ========================================
+   12. MEDIA QUERIES - RESPONSIVE DESIGN
+   ======================================== */
+
+/* 
+ * TABLETTE (min-width: 768px)
+ * À partir de 768px, on passe à une mise en page plus large
+ */
+@media (min-width: 768px) {
+    /* Conteneur avec plus de padding */
+    .container {
+        padding: 0 var(--spacing-lg);
+    }
+    
+    /* Navigation en ligne sur tablette/desktop */
+    .nav-menu {
+        position: static;
+        flex-direction: row;
+        width: auto;
+        height: auto;
+        background-color: transparent;
+        padding: 0;
+        box-shadow: none;
+    }
+    
+    /* Masquer le bouton hamburger sur desktop */
+    .nav-toggle {
+        display: none;
+    }
+    
+    /* Hero avec tailles de police augmentées */
+    .hero-title {
+        font-size: 3rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.75rem;
+    }
+    
+    /* Menu en 2 colonnes */
+    .menu-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .menu-grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* Contact en 2 colonnes côte à côte */
+    .contact-wrapper {
+        flex-direction: row;
+    }
+    
+    /* Footer en 2 colonnes */
+    .footer-content {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* 
+ * DESKTOP (min-width: 1024px)
+ * Layout complet pour grands écrans
+ */
+@media (min-width: 1024px) {
+    /* Hero encore plus grand */
+    .hero-title {
+        font-size: 3.5rem;
+    }
+    
+    /* Menu en 3 colonnes */
+    .menu-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    /* Petits items en 4 colonnes */
+    .menu-grid-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    /* Footer en 4 colonnes */
+    .footer-content {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* 
+ * TRÈS GRANDS ÉCRANS (min-width: 1440px)
+ * Optimisations pour très grands écrans
+ */
+@media (min-width: 1440px) {
+    :root {
+        --font-size-base: 1.125rem; /* Légère augmentation de la taille de base */
+    }
+}
+
+/* ========================================
+   12. ANIMATIONS ET EFFETS SPÉCIAUX
+   ======================================== */
+
+/* Animation de fondu pour les éléments au chargement */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Application de l'animation aux cartes du menu */
+.menu-item {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Délai progressif pour effet cascade */
+.menu-item:nth-child(1) { animation-delay: 0.1s; }
+.menu-item:nth-child(2) { animation-delay: 0.2s; }
+.menu-item:nth-child(3) { animation-delay: 0.3s; }
+.menu-item:nth-child(4) { animation-delay: 0.4s; }
+
+/* ========================================
+   13. CLASSES UTILITAIRES
+   ======================================== */
+
+/* Classes pour espacement rapide */
+.mt-1 { margin-top: var(--spacing-xs); }
+.mt-2 { margin-top: var(--spacing-sm); }
+.mt-3 { margin-top: var(--spacing-md); }
+.mt-4 { margin-top: var(--spacing-lg); }
+
+.mb-1 { margin-bottom: var(--spacing-xs); }
+.mb-2 { margin-bottom: var(--spacing-sm); }
+.mb-3 { margin-bottom: var(--spacing-md); }
+.mb-4 { margin-bottom: var(--spacing-lg); }
+
+/* Alignement du texte */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+/* Visibilité */
+.hidden { display: none; }
+.visible { display: block; }
+
+/* 
+ * FIN DU FICHIER CSS
+ * 
+ * NOTES POUR LES ÉTUDIANTS :
+ * - Ce CSS utilise des pratiques modernes (Grid, Flexbox, variables CSS)
+ * - L'approche mobile-first facilite la maintenance
+ * - Les noms de classes suivent la convention BEM (Block Element Modifier)
+ * - Les commentaires expliquent le "pourquoi" pas seulement le "quoi"
+ * - Le code est organisé logiquement de haut en bas
+ */
