@@ -48,15 +48,29 @@ const cartSummary = document.getElementById('cartSummary');
 const cartTotal = document.getElementById('cartTotal');
 const checkoutBtn = document.getElementById('checkoutBtn');
 
+const checkoutFields = {
+    lastName: document.getElementById('checkoutLastName'),
+    firstName: document.getElementById('checkoutFirstName'),
+    address: document.getElementById('checkoutAddress'),
+    city: document.getElementById('checkoutCity'),
+    phone: document.getElementById('checkoutPhone')
+};
+
 /**
  * Configuration pour la validation du formulaire
  * Centraliser les patterns de validation facilite la maintenance
  */
 const VALIDATION_PATTERNS = {
     email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-    phone: /^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/,
+    phone: /^\d{3}\s\d{3}\s\d{2}\s\d{2}$/,
     name: /^[a-zA-ZÀ-ÿ\s'-]{2,50}$/
 };
+
+const CHECKOUT_PATTERNS = {
+    name: VALIDATION_PATTERNS.name,
+    phone: /^\d{3}\s\d{3}\s\d{2}\s\d{2}$/
+};
+const MIN_ORDER_TOTAL = 15;
 
 /**
  * Messages d'erreur personnalisés
@@ -65,8 +79,8 @@ const VALIDATION_PATTERNS = {
 const ERROR_MESSAGES = {
     required: 'Ce champ est obligatoire',
     invalidEmail: 'Veuillez entrer une adresse email valide',
-    invalidPhone: 'Veuillez entrer un numéro de téléphone valide (ex: 06 12 34 56 78)',
-    invalidName: 'Veuillez entrer un nom valide (2-50 caractères)',
+    invalidPhone: 'Veuillez entrer un numéro au format XXX XXX XX XX (ex: 078 123 45 67)',
+    invalidName: 'Veuillez entrer un nom valide',
     invalidSubject: 'Veuillez sélectionner un sujet',
     shortMessage: 'Le message doit contenir au moins 10 caractères'
 };
@@ -687,7 +701,7 @@ class ShoppingCart {
         itemDiv.innerHTML = `
             <div class="cart-item-info">
                 <div class="cart-item-name">${item.name}</div>
-                <div class="cart-item-price">${item.price.toFixed(2)}€ chacun</div>
+                <div class="cart-item-price">${item.price.toFixed(2)} CHF chacun</div>
             </div>
             <div class="quantity-controls">
                 <button class="quantity-btn" data-action="decrease" data-item-id="${item.id}">-</button>
@@ -722,14 +736,14 @@ class ShoppingCart {
      */
     updateCartSummary() {
         if (!cartSummary || !cartTotal) return;
-        
+
         const total = this.getTotal();
-        
+
         if (this.items.length === 0) {
             cartSummary.style.display = 'none';
         } else {
             cartSummary.style.display = 'block';
-            cartTotal.textContent = `${total.toFixed(2)}€`;
+            cartTotal.textContent = `${total.toFixed(2)} CHF`;
         }
     }
     
@@ -760,20 +774,41 @@ class ShoppingCart {
             alert('Votre panier est vide !');
             return;
         }
-        
+
+        if (!this.validateCheckoutDetails()) {
+            alert('Veuillez remplir tous les champs correctement.');
+            return;
+        }
+
         const total = this.getTotal();
+        if (total < MIN_ORDER_TOTAL) {
+            alert(`Désolé !\n Nous ne livrons pas en dessous de ${MIN_ORDER_TOTAL.toFixed(2)} CHF de commande.`);
+            return;
+        }
         const totalItems = this.getTotalItems();
-        
-        // Simulation d'une commande
-        const orderSummary = this.items.map(item => 
-            `${item.quantity}x ${item.name} - ${(item.price * item.quantity).toFixed(2)}€`
+        const customer = {
+            lastName: checkoutFields.lastName.value.trim(),
+            firstName: checkoutFields.firstName.value.trim(),
+            address: checkoutFields.address.value.trim(),
+            city: checkoutFields.city.value.trim(),
+            phone: checkoutFields.phone.value.trim()
+        };
+
+        const orderSummary = this.items.map(item =>
+            `${item.quantity}x ${item.name} - ${(item.price * item.quantity).toFixed(2)} CHF`
         ).join('\n');
-        
-        const confirmMessage = `🍽️ Résumé de votre commande :\n\n${orderSummary}\n\n💰 Total : ${total.toFixed(2)}€\n📦 Nombre d'articles : ${totalItems}\n\nConfirmer la commande ?`;
-        
+
+        const customerSummary =
+            `👤 Client : ${customer.firstName} ${customer.lastName}\n` +
+            `🏠 Adresse : ${customer.address}, ${customer.city}\n` +
+            `📞 Téléphone : ${customer.phone}`;
+
+        const confirmMessage =
+            `${customerSummary}\n\n🍽️ Commande :\n${orderSummary}\n\n` +
+            `💰 Total : ${total.toFixed(2)} CHF\n📦 Nombre d'articles : ${totalItems}\n\nConfirmer la commande ?`;
+
         if (confirm(confirmMessage)) {
-            // Simulation de la commande réussie
-            alert('🎉 Commande confirmée !\n\nVotre commande sera prête dans 15-20 minutes.\nMerci de votre confiance !');
+            alert('🎉 Commande confirmée ! \nVotre commande sera prête dans 15-20 minutes.\nMerci de votre confiance !');
             
             // Vider le panier
             this.clearCart();
@@ -785,6 +820,42 @@ class ShoppingCart {
             
             console.log('✅ Commande réalisée avec succès');
         }
+    }
+    
+    /**
+     * Valider les détails de la commande (checkout)
+     * @returns {boolean} true si valide, false sinon
+     */
+    validateCheckoutDetails() {
+        const values = {
+            lastName: checkoutFields.lastName?.value.trim(),
+            firstName: checkoutFields.firstName?.value.trim(),
+            address: checkoutFields.address?.value.trim(),
+            city: checkoutFields.city?.value.trim(),
+            phone: checkoutFields.phone?.value.trim()
+        };
+
+        let isValid = true;
+
+        for (const [key, value] of Object.entries(values)) {
+            const field = checkoutFields[key];
+            if (!field) continue;
+
+            const baseInvalid = !value;
+            const patternInvalid =
+                key === 'phone' ? !CHECKOUT_PATTERNS.phone.test(value) :
+                (key === 'lastName' || key === 'firstName') ? !CHECKOUT_PATTERNS.name.test(value) :
+                false;
+
+            if (baseInvalid || patternInvalid) {
+                field.classList.add('checkout-error');
+                isValid = false;
+            } else {
+                field.classList.remove('checkout-error');
+            }
+        }
+
+        return isValid;
     }
     
     /**
