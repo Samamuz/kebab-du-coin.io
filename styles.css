@@ -1,1186 +1,1033 @@
+/**
+ * ========================================
+ * SCRIPT JAVASCRIPT - LE KEBAB DU CAMPUS
+ * ========================================
+ * 
+ * Ce fichier contient tout le JavaScript nécessaire pour le site.
+ * Il utilise du JavaScript vanilla (pas de bibliothèques externes).
+ * 
+ * STRUCTURE DU FICHIER :
+ * 1. Variables et constantes globales
+ * 2. Navigation mobile (menu hamburger)
+ * 3. Scroll smooth et navigation active
+ * 4. Validation du formulaire
+ * 5. Initialisation au chargement de la page
+ * 
+ * BONNES PRATIQUES UTILISÉES :
+ * - ES6+ (const, let, arrow functions, template literals)
+ * - Code modulaire et réutilisable
+ * - Commentaires explicatifs
+ * - Gestion des événements moderne
+ * - Validation côté client robuste
+ */
+
+'use strict'; // Active le mode strict pour éviter les erreurs communes
+
+/* ========================================
+   1. VARIABLES ET CONSTANTES GLOBALES
+   ======================================== */
+
+/**
+ * Sélection des éléments DOM principaux
+ * On utilise const car ces références ne changeront pas
+ * querySelector est préféré à getElementById pour sa flexibilité
+ */
+const navToggle = document.getElementById('navToggle');
+const navMenu = document.getElementById('navMenu');
+const navLinks = document.querySelectorAll('.nav-link');
+const contactForm = document.getElementById('contactForm');
+const header = document.getElementById('header');
+
+// Shopping cart elements
+const cartToggle = document.getElementById('cartToggle');
+const cartContent = document.getElementById('cartContent');
+const cartCount = document.getElementById('cartCount');
+const cartItems = document.getElementById('cartItems');
+const cartEmpty = document.getElementById('cartEmpty');
+const cartSummary = document.getElementById('cartSummary');
+const cartTotal = document.getElementById('cartTotal');
+const checkoutBtn = document.getElementById('checkoutBtn');
+
+const checkoutFields = {
+    lastName: document.getElementById('checkoutLastName'),
+    firstName: document.getElementById('checkoutFirstName'),
+    address: document.getElementById('checkoutAddress'),
+    city: document.getElementById('checkoutCity'),
+    phone: document.getElementById('checkoutPhone')
+};
+
+/**
+ * Configuration pour la validation du formulaire
+ * Centraliser les patterns de validation facilite la maintenance
+ */
+const VALIDATION_PATTERNS = {
+    email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    phone: /^\d{3}\s\d{3}\s\d{2}\s\d{2}$/,
+    name: /^[a-zA-ZÀ-ÿ\s'-]{2,50}$/
+};
+
+const CHECKOUT_PATTERNS = {
+    name: VALIDATION_PATTERNS.name,
+    phone: /^\d{3}\s\d{3}\s\d{2}\s\d{2}$/
+};
+const MIN_ORDER_TOTAL = 15;
+
+/**
+ * Messages d'erreur personnalisés
+ * Utilisation d'un objet pour faciliter la traduction/modification
+ */
+const ERROR_MESSAGES = {
+    required: 'Ce champ est obligatoire',
+    invalidEmail: 'Veuillez entrer une adresse email valide',
+    invalidPhone: 'Veuillez entrer un numéro au format XXX XXX XX XX (ex: 078 123 45 67)',
+    invalidName: 'Veuillez entrer un nom valide',
+    invalidSubject: 'Veuillez sélectionner un sujet',
+    shortMessage: 'Le message doit contenir au moins 10 caractères'
+};
+
+/* ========================================
+   2. NAVIGATION MOBILE (MENU HAMBURGER)
+   ======================================== */
+
+/**
+ * Fonction pour basculer l'état du menu mobile
+ * Toggle permet d'ajouter/retirer une classe selon son état actuel
+ */
+function toggleMobileMenu() {
+    navMenu.classList.toggle('active');
+    navToggle.classList.toggle('active');
+    
+    // Empêcher le scroll du body quand le menu est ouvert (meilleure UX mobile)
+    document.body.style.overflow = navMenu.classList.contains('active') ? 'hidden' : '';
+}
+
+/**
+ * Fonction pour fermer le menu mobile
+ * Utile quand on clique sur un lien ou en dehors du menu
+ */
+function closeMobileMenu() {
+    navMenu.classList.remove('active');
+    navToggle.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+/**
+ * Gestionnaire d'événement pour le bouton hamburger
+ * On vérifie que l'élément existe avant d'ajouter l'écouteur (défensif)
+ */
+if (navToggle) {
+    navToggle.addEventListener('click', toggleMobileMenu);
+}
+
+/**
+ * Fermer le menu quand on clique sur un lien de navigation
+ * Améliore l'expérience utilisateur sur mobile
+ */
+navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+        closeMobileMenu();
+    });
+});
+
+/**
+ * Fermer le menu si on clique en dehors
+ * Utilisation de event.target pour détecter où le clic a eu lieu
+ */
+document.addEventListener('click', (event) => {
+    const isClickInsideMenu = navMenu.contains(event.target);
+    const isClickOnToggle = navToggle.contains(event.target);
+    
+    // Si le menu est ouvert et qu'on clique en dehors du menu et du bouton
+    if (navMenu.classList.contains('active') && !isClickInsideMenu && !isClickOnToggle) {
+        closeMobileMenu();
+    }
+});
+
+/* ========================================
+   3. SCROLL SMOOTH ET NAVIGATION ACTIVE
+   ======================================== */
+
+/**
+ * Fonction pour mettre à jour le lien de navigation actif
+ * selon la section visible à l'écran
+ * 
+ * IntersectionObserver est une API moderne pour détecter quand
+ * un élément entre/sort de la vue (meilleure performance que scroll)
+ */
+function initScrollObserver() {
+    const sections = document.querySelectorAll('section[id]');
+    
+    // Configuration de l'observer
+    const observerOptions = {
+        root: null, // viewport
+        rootMargin: '-50% 0px -50% 0px', // Zone de détection au milieu de l'écran
+        threshold: 0 // Déclenche dès qu'un pixel est visible
+    };
+    
+    // Callback appelé quand une section entre/sort de la zone de détection
+    const observerCallback = (entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // Retirer la classe active de tous les liens
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                });
+                
+                // Ajouter la classe active au lien correspondant à la section visible
+                const activeLink = document.querySelector(`.nav-link[href="#${entry.target.id}"]`);
+                if (activeLink) {
+                    activeLink.classList.add('active');
+                }
+            }
+        });
+    };
+    
+    // Créer l'observer et observer chaque section
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+    sections.forEach(section => observer.observe(section));
+}
+
+/**
+ * Masquer/afficher le header au scroll (optionnel)
+ * Améliore l'espace d'affichage sur mobile
+ */
+let lastScrollTop = 0;
+let scrollTimer;
+
+window.addEventListener('scroll', () => {
+    // Utilisation d'un timer pour limiter la fréquence d'exécution (debouncing)
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        // Si on scroll vers le bas de plus de 100px, masquer le header
+        if (scrollTop > lastScrollTop && scrollTop > 100) {
+            header.style.transform = 'translateY(-100%)';
+        } else {
+            // Si on scroll vers le haut, afficher le header
+            header.style.transform = 'translateY(0)';
+        }
+        
+        lastScrollTop = scrollTop;
+    }, 100); // Exécuter maximum une fois toutes les 100ms
+});
+
+/* ========================================
+   4. VALIDATION DU FORMULAIRE
+   ======================================== */
+
+/**
+ * CLASSE FormValidator
+ * Encapsule toute la logique de validation dans une classe
+ * Avantages : réutilisable, maintenable, testable
+ */
+class FormValidator {
+    /**
+     * Constructeur de la classe
+     * @param {HTMLFormElement} form - L'élément formulaire à valider
+     */
+    constructor(form) {
+        this.form = form;
+        this.fields = {
+            name: this.form.querySelector('#name'),
+            email: this.form.querySelector('#email'),
+            phone: this.form.querySelector('#phone'),
+            subject: this.form.querySelector('#subject'),
+            message: this.form.querySelector('#message')
+        };
+        this.init();
+    }
+    
+    /**
+     * Initialisation : ajout des écouteurs d'événements
+     */
+    init() {
+        // Validation en temps réel (à la saisie)
+        Object.values(this.fields).forEach(field => {
+            // Validation pendant la saisie (après le premier blur)
+            field.addEventListener('blur', () => this.validateField(field));
+            field.addEventListener('input', () => {
+                // Nettoyer les erreurs pendant la saisie si le champ avait une erreur
+                if (field.classList.contains('error')) {
+                    this.validateField(field);
+                }
+            });
+        });
+        
+        // Validation à la soumission du formulaire
+        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+    }
+    
+    /**
+     * Valider un champ individuel
+     * @param {HTMLInputElement} field - Le champ à valider
+     * @returns {boolean} true si valide, false sinon
+     */
+    validateField(field) {
+        const fieldName = field.id;
+        const value = field.value.trim();
+        const errorElement = document.getElementById(`${fieldName}Error`);
+        
+        // Réinitialiser l'état du champ
+        field.classList.remove('error', 'success');
+        errorElement.textContent = '';
+        
+        // Vérifier si le champ est vide
+        if (!value) {
+            this.showError(field, errorElement, ERROR_MESSAGES.required);
+            return false;
+        }
+        
+        // Validation spécifique selon le type de champ
+        let isValid = true;
+        let errorMessage = '';
+        
+        switch(fieldName) {
+            case 'name':
+                if (!VALIDATION_PATTERNS.name.test(value)) {
+                    isValid = false;
+                    errorMessage = ERROR_MESSAGES.invalidName;
+                }
+                break;
+                
+            case 'email':
+                if (!VALIDATION_PATTERNS.email.test(value)) {
+                    isValid = false;
+                    errorMessage = ERROR_MESSAGES.invalidEmail;
+                }
+                break;
+                
+            case 'phone':
+                // Nettoyer le numéro de téléphone (retirer espaces, points, tirets)
+                const cleanPhone = value.replace(/[\s.-]/g, '');
+                if (!VALIDATION_PATTERNS.phone.test(value)) {
+                    isValid = false;
+                    errorMessage = ERROR_MESSAGES.invalidPhone;
+                }
+                break;
+                
+            case 'subject':
+                if (value === '') {
+                    isValid = false;
+                    errorMessage = ERROR_MESSAGES.invalidSubject;
+                }
+                break;
+                
+            case 'message':
+                if (value.length < 10) {
+                    isValid = false;
+                    errorMessage = ERROR_MESSAGES.shortMessage;
+                }
+                break;
+        }
+        
+        // Afficher l'erreur ou le succès
+        if (!isValid) {
+            this.showError(field, errorElement, errorMessage);
+            return false;
+        } else {
+            this.showSuccess(field);
+            return true;
+        }
+    }
+    
+    /**
+     * Afficher un message d'erreur
+     * @param {HTMLInputElement} field - Le champ en erreur
+     * @param {HTMLElement} errorElement - L'élément où afficher l'erreur
+     * @param {string} message - Le message d'erreur
+     */
+    showError(field, errorElement, message) {
+        field.classList.add('error');
+        errorElement.textContent = message;
+        // Annoncer l'erreur aux lecteurs d'écran (accessibilité)
+        field.setAttribute('aria-invalid', 'true');
+    }
+    
+    /**
+     * Indiquer visuellement que le champ est valide
+     * @param {HTMLInputElement} field - Le champ valide
+     */
+    showSuccess(field) {
+        field.classList.add('success');
+        field.setAttribute('aria-invalid', 'false');
+    }
+    
+    /**
+     * Valider tous les champs du formulaire
+     * @returns {boolean} true si tous les champs sont valides
+     */
+    validateAllFields() {
+        let isFormValid = true;
+        
+        // Valider chaque champ et garder trace du résultat global
+        Object.values(this.fields).forEach(field => {
+            const isFieldValid = this.validateField(field);
+            if (!isFieldValid) {
+                isFormValid = false;
+            }
+        });
+        
+        return isFormValid;
+    }
+    
+    /**
+     * Gérer la soumission du formulaire
+     * @param {Event} event - L'événement de soumission
+     */
+    handleSubmit(event) {
+        event.preventDefault(); // Empêcher la soumission par défaut
+        
+        // Valider tous les champs
+        const isValid = this.validateAllFields();
+        
+        if (isValid) {
+            this.submitForm();
+        } else {
+            // Scroller vers le premier champ en erreur
+            const firstError = this.form.querySelector('.error');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }
+        }
+    }
+    
+    /**
+     * Soumettre le formulaire (simulation)
+     * Dans un vrai projet, on enverrait les données à un serveur
+     */
+    submitForm() {
+        // Récupérer les données du formulaire
+        const formData = {
+            name: this.fields.name.value.trim(),
+            email: this.fields.email.value.trim(),
+            phone: this.fields.phone.value.trim(),
+            subject: this.fields.subject.value,
+            message: this.fields.message.value.trim(),
+            timestamp: new Date().toISOString()
+        };
+        
+        // Simuler un délai d'envoi (comme une requête serveur)
+        const submitButton = this.form.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.textContent;
+        submitButton.textContent = 'Envoi en cours...';
+        submitButton.disabled = true;
+        
+        setTimeout(() => {
+            // Afficher le message de succès
+            this.showSuccessMessage();
+            
+            // Logger les données (en développement seulement)
+            console.log('Données du formulaire:', formData);
+            
+            // Réinitialiser le formulaire
+            this.resetForm();
+            
+            // Restaurer le bouton
+            submitButton.textContent = originalButtonText;
+            submitButton.disabled = false;
+        }, 1500);
+    }
+    
+    /**
+     * Afficher le message de succès
+     */
+    showSuccessMessage() {
+        const successMessage = document.getElementById('formSuccess');
+        successMessage.classList.add('show');
+        
+        // Masquer le message après 5 secondes
+        setTimeout(() => {
+            successMessage.classList.remove('show');
+        }, 5000);
+        
+        // Scroller vers le message de succès
+        successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    /**
+     * Réinitialiser le formulaire
+     */
+    resetForm() {
+        this.form.reset();
+        
+        // Retirer les classes de validation
+        Object.values(this.fields).forEach(field => {
+            field.classList.remove('error', 'success');
+            field.removeAttribute('aria-invalid');
+            
+            const errorElement = document.getElementById(`${field.id}Error`);
+            if (errorElement) {
+                errorElement.textContent = '';
+            }
+        });
+    }
+}
+
+/* ========================================
+   5. SHOPPING CART SYSTEM
+   ======================================== */
+
+/**
+ * CLASSE ShoppingCart
+ * Gère toute la logique du panier d'achat
+ * Fonctionnalités : ajout, suppression, quantités, total, persistance
+ */
+class ShoppingCart {
+    /**
+     * Constructeur de la classe ShoppingCart
+     */
+    constructor() {
+        this.items = this.loadCartFromStorage();
+        this.isCartOpen = false;
+        this.init();
+    }
+    
+    /**
+     * Initialisation du panier
+     */
+    init() {
+        this.bindEvents();
+        this.updateCartDisplay();
+        this.setupAddToCartButtons();
+        
+        console.log('🛒 Système de panier initialisé');
+    }
+    
+    /**
+     * Liaison des événements
+     */
+    bindEvents() {
+        // Toggle du panier
+        if (cartToggle) {
+            cartToggle.addEventListener('click', () => this.toggleCart());
+        }
+        
+        // Bouton de commande
+        if (checkoutBtn) {
+            checkoutBtn.addEventListener('click', () => this.checkout());
+        }
+    }
+    
+    /**
+     * Configuration des boutons "Ajouter au panier"
+     */
+    setupAddToCartButtons() {
+        const addToCartButtons = document.querySelectorAll('.btn-add-to-cart');
+        
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const menuItem = button.closest('.menu-item');
+                
+                if (menuItem) {
+                    const item = {
+                        id: this.generateItemId(menuItem),
+                        name: menuItem.dataset.name,
+                        price: parseFloat(menuItem.dataset.price),
+                        category: menuItem.dataset.category
+                    };
+                    
+                    this.addItem(item);
+                    this.showAddToCartFeedback(button);
+                }
+            });
+        });
+    }
+    
+    /**
+     * Générer un ID unique pour un item
+     * @param {HTMLElement} menuItem - L'élément menu
+     * @returns {string} ID unique
+     */
+    generateItemId(menuItem) {
+        const name = menuItem.dataset.name;
+        const price = menuItem.dataset.price;
+        return `${name}-${price}`.toLowerCase().replace(/\s+/g, '-');
+    }
+    
+    /**
+     * Ajouter un article au panier
+     * @param {Object} item - L'article à ajouter
+     */
+    addItem(item) {
+        const existingItem = this.items.find(cartItem => cartItem.id === item.id);
+        
+        if (existingItem) {
+            existingItem.quantity += 1;
+        } else {
+            this.items.push({
+                ...item,
+                quantity: 1,
+                addedAt: Date.now()
+            });
+        }
+        
+        this.updateCartDisplay();
+        this.saveCartToStorage();
+        
+        // Ouvrir le panier automatiquement après ajout
+        if (!this.isCartOpen) {
+            this.toggleCart();
+        }
+        
+        console.log('📦 Article ajouté:', item.name);
+    }
+    
+    /**
+     * Retirer un article du panier
+     * @param {string} itemId - ID de l'article
+     */
+    removeItem(itemId) {
+        this.items = this.items.filter(item => item.id !== itemId);
+        this.updateCartDisplay();
+        this.saveCartToStorage();
+        
+        console.log('🗑️ Article retiré:', itemId);
+    }
+    
+    /**
+     * Modifier la quantité d'un article
+     * @param {string} itemId - ID de l'article
+     * @param {number} newQuantity - Nouvelle quantité
+     */
+    updateQuantity(itemId, newQuantity) {
+        const item = this.items.find(cartItem => cartItem.id === itemId);
+        
+        if (item) {
+            if (newQuantity <= 0) {
+                this.removeItem(itemId);
+            } else {
+                item.quantity = newQuantity;
+                this.updateCartDisplay();
+                this.saveCartToStorage();
+            }
+        }
+    }
+    
+    /**
+     * Calculer le total du panier
+     * @returns {number} Total en euros
+     */
+    getTotal() {
+        return this.items.reduce((total, item) => total + (item.price * item.quantity), 0);
+    }
+    
+    /**
+     * Obtenir le nombre total d'articles
+     * @returns {number} Nombre total d'articles
+     */
+    getTotalItems() {
+        return this.items.reduce((total, item) => total + item.quantity, 0);
+    }
+    
+    /**
+     * Basculer l'affichage du panier
+     */
+    toggleCart() {
+        this.isCartOpen = !this.isCartOpen;
+        
+        if (cartContent) {
+            cartContent.style.display = this.isCartOpen ? 'block' : 'none';
+        }
+        
+        // Animation du bouton
+        if (cartToggle) {
+            cartToggle.classList.toggle('cart-bounce');
+            setTimeout(() => {
+                cartToggle.classList.remove('cart-bounce');
+            }, 300);
+        }
+    }
+    
+    /**
+     * Mettre à jour l'affichage du panier
+     */
+    updateCartDisplay() {
+        this.updateCartCount();
+        this.updateCartItems();
+        this.updateCartSummary();
+    }
+    
+    /**
+     * Mettre à jour le compteur du panier
+     */
+    updateCartCount() {
+        const totalItems = this.getTotalItems();
+        
+        if (cartCount) {
+            cartCount.textContent = totalItems;
+            
+            // Animation si il y a des articles
+            if (totalItems > 0) {
+                cartCount.parentElement.classList.add('cart-bounce');
+                setTimeout(() => {
+                    cartCount.parentElement.classList.remove('cart-bounce');
+                }, 300);
+            }
+        }
+    }
+    
+    /**
+     * Mettre à jour la liste des articles dans le panier
+     */
+    updateCartItems() {
+        if (!cartItems || !cartEmpty) return;
+        
+        // Vider le conteneur
+        cartItems.innerHTML = '';
+        
+        if (this.items.length === 0) {
+            cartEmpty.style.display = 'block';
+        } else {
+            cartEmpty.style.display = 'none';
+            
+            this.items.forEach(item => {
+                const itemElement = this.createCartItemElement(item);
+                cartItems.appendChild(itemElement);
+            });
+        }
+    }
+    
+    /**
+     * Créer l'élément HTML pour un article du panier
+     * @param {Object} item - L'article
+     * @returns {HTMLElement} Élément HTML
+     */
+    createCartItemElement(item) {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'cart-item';
+        itemDiv.innerHTML = `
+            <div class="cart-item-info">
+                <div class="cart-item-name">${item.name}</div>
+                <div class="cart-item-price">${item.price.toFixed(2)} CHF chacun</div>
+            </div>
+            <div class="quantity-controls">
+                <button class="quantity-btn" data-action="decrease" data-item-id="${item.id}">-</button>
+                <span class="quantity-display">${item.quantity}</span>
+                <button class="quantity-btn" data-action="increase" data-item-id="${item.id}">+</button>
+                <button class="remove-item" data-item-id="${item.id}">Supprimer</button>
+            </div>
+        `;
+        
+        // Événements pour les contrôles
+        const decreaseBtn = itemDiv.querySelector('[data-action="decrease"]');
+        const increaseBtn = itemDiv.querySelector('[data-action="increase"]');
+        const removeBtn = itemDiv.querySelector('.remove-item');
+        
+        decreaseBtn.addEventListener('click', () => {
+            this.updateQuantity(item.id, item.quantity - 1);
+        });
+        
+        increaseBtn.addEventListener('click', () => {
+            this.updateQuantity(item.id, item.quantity + 1);
+        });
+        
+        removeBtn.addEventListener('click', () => {
+            this.removeItem(item.id);
+        });
+        
+        return itemDiv;
+    }
+    
+    /**
+     * Mettre à jour le résumé du panier
+     */
+    updateCartSummary() {
+        if (!cartSummary || !cartTotal) return;
+
+        const total = this.getTotal();
+
+        if (this.items.length === 0) {
+            cartSummary.style.display = 'none';
+        } else {
+            cartSummary.style.display = 'block';
+            cartTotal.textContent = `${total.toFixed(2)} CHF`;
+        }
+    }
+    
+    /**
+     * Feedback visuel lors de l'ajout au panier
+     * @param {HTMLButtonElement} button - Le bouton cliqué
+     */
+    showAddToCartFeedback(button) {
+        const originalText = button.textContent;
+        
+        // Animation du bouton
+        button.classList.add('adding');
+        button.textContent = 'Ajouté !';
+        button.disabled = true;
+        
+        setTimeout(() => {
+            button.classList.remove('adding');
+            button.textContent = originalText;
+            button.disabled = false;
+        }, 1000);
+    }
+    
+    /**
+     * Processus de commande
+     */
+    checkout() {
+        if (this.items.length === 0) {
+            alert('Votre panier est vide !');
+            return;
+        }
+
+        if (!this.validateCheckoutDetails()) {
+            alert('Veuillez remplir tous les champs correctement.');
+            return;
+        }
+
+        const total = this.getTotal();
+        if (total < MIN_ORDER_TOTAL) {
+            alert(`Désolé !\n Nous ne livrons pas en dessous de ${MIN_ORDER_TOTAL.toFixed(2)} CHF de commande.`);
+            return;
+        }
+        const totalItems = this.getTotalItems();
+        const customer = {
+            lastName: checkoutFields.lastName.value.trim(),
+            firstName: checkoutFields.firstName.value.trim(),
+            address: checkoutFields.address.value.trim(),
+            city: checkoutFields.city.value.trim(),
+            phone: checkoutFields.phone.value.trim()
+        };
+
+        const orderSummary = this.items.map(item =>
+            `${item.quantity}x ${item.name} - ${(item.price * item.quantity).toFixed(2)} CHF`
+        ).join('\n');
+
+        const customerSummary =
+            `👤 Client : ${customer.firstName} ${customer.lastName}\n` +
+            `🏠 Adresse : ${customer.address}, ${customer.city}\n` +
+            `📞 Téléphone : ${customer.phone}`;
+
+        const confirmMessage =
+            `${customerSummary}\n\n🍽️ Commande :\n${orderSummary}\n\n` +
+            `💰 Total : ${total.toFixed(2)} CHF\n📦 Nombre d'articles : ${totalItems}\n\nConfirmer la commande ?`;
+
+        if (confirm(confirmMessage)) {
+            alert('🎉 Commande confirmée ! \nVotre commande sera prête dans 15-20 minutes.\nMerci de votre confiance !');
+            
+            // Vider le panier
+            this.clearCart();
+            
+            // Fermer le panier
+            if (this.isCartOpen) {
+                this.toggleCart();
+            }
+            
+            console.log('✅ Commande réalisée avec succès');
+        }
+    }
+    
+    /**
+     * Valider les détails de la commande (checkout)
+     * @returns {boolean} true si valide, false sinon
+     */
+    validateCheckoutDetails() {
+        const values = {
+            lastName: checkoutFields.lastName?.value.trim(),
+            firstName: checkoutFields.firstName?.value.trim(),
+            address: checkoutFields.address?.value.trim(),
+            city: checkoutFields.city?.value.trim(),
+            phone: checkoutFields.phone?.value.trim()
+        };
+
+        let isValid = true;
+
+        for (const [key, value] of Object.entries(values)) {
+            const field = checkoutFields[key];
+            if (!field) continue;
+
+            const baseInvalid = !value;
+            const patternInvalid =
+                key === 'phone' ? !CHECKOUT_PATTERNS.phone.test(value) :
+                (key === 'lastName' || key === 'firstName') ? !CHECKOUT_PATTERNS.name.test(value) :
+                false;
+
+            if (baseInvalid || patternInvalid) {
+                field.classList.add('checkout-error');
+                isValid = false;
+            } else {
+                field.classList.remove('checkout-error');
+            }
+        }
+
+        return isValid;
+    }
+    
+    /**
+     * Vider complètement le panier
+     */
+    clearCart() {
+        this.items = [];
+        this.updateCartDisplay();
+        this.saveCartToStorage();
+    }
+    
+    /**
+     * Sauvegarder le panier dans le localStorage
+     */
+    saveCartToStorage() {
+        try {
+            localStorage.setItem('kebab_cart', JSON.stringify(this.items));
+        } catch (error) {
+            console.warn('⚠️ Impossible de sauvegarder le panier:', error);
+        }
+    }
+    
+    /**
+     * Charger le panier depuis le localStorage
+     * @returns {Array} Articles du panier
+     */
+    loadCartFromStorage() {
+        try {
+            const saved = localStorage.getItem('kebab_cart');
+            return saved ? JSON.parse(saved) : [];
+        } catch (error) {
+            console.warn('⚠️ Impossible de charger le panier:', error);
+            return [];
+        }
+    }
+}
+
+/* ========================================
+   6. INITIALISATION
+   ======================================== */
+
+/**
+ * Fonction d'initialisation principale
+ * Exécutée quand le DOM est complètement chargé
+ */
+function init() {
+    console.log('🥙 Site du Kebab du Campus initialisé avec succès!');
+    
+    // Initialiser l'observer pour la navigation active
+    initScrollObserver();
+    
+    // Initialiser la validation du formulaire
+    if (contactForm) {
+        new FormValidator(contactForm);
+    }
+    
+    // Initialiser le système de panier
+    window.shoppingCart = new ShoppingCart();
+    
+    // Ajouter une animation au chargement de la page
+    document.body.style.opacity = '0';
+    setTimeout(() => {
+        document.body.style.transition = 'opacity 0.5s';
+        document.body.style.opacity = '1';
+    }, 100);
+}
+
+/**
+ * Attendre que le DOM soit complètement chargé
+ * DOMContentLoaded est préféré à window.onload car plus rapide
+ * (ne attend pas les images et autres ressources)
+ */
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    // Le DOM est déjà chargé, exécuter immédiatement
+    init();
+}
+
+/**
+ * FONCTIONNALITÉS ADDITIONNELLES (OPTIONNELLES)
+ * Ces fonctions peuvent être décommentées pour ajouter des features
+ */
+
+/**
+ * Ajouter un effet parallax au hero (décommenter pour activer)
+ */
 /*
- * ========================================
- * FEUILLE DE STYLE - LE KEBAB DU CAMPUS
- * ========================================
+window.addEventListener('scroll', () => {
+    const hero = document.querySelector('.hero');
+    const scrolled = window.pageYOffset;
+    hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+});
+*/
+
+/**
+ * Ajouter un bouton "retour en haut"
+ */
+function addScrollToTopButton() {
+    // Créer le bouton
+    const button = document.createElement('button');
+    button.innerHTML = '↑';
+    button.className = 'scroll-to-top';
+    button.setAttribute('aria-label', 'Retour en haut');
+    
+    // Styles inline (ou ajouter au CSS)
+    Object.assign(button.style, {
+        position: 'fixed',
+        bottom: '20px',
+        right: '20px',
+        width: '50px',
+        height: '50px',
+        borderRadius: '50%',
+        backgroundColor: 'var(--color-primary)',
+        color: 'white',
+        border: 'none',
+        fontSize: '24px',
+        cursor: 'pointer',
+        display: 'none',
+        zIndex: '1000',
+        boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+        transition: 'all 0.3s'
+    });
+    
+    // Ajouter au DOM
+    document.body.appendChild(button);
+    
+    // Afficher/masquer selon le scroll
+    window.addEventListener('scroll', () => {
+        if (window.pageYOffset > 300) {
+            button.style.display = 'block';
+        } else {
+            button.style.display = 'none';
+        }
+    });
+    
+    // Action au clic
+    button.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    
+    // Effet hover
+    button.addEventListener('mouseenter', () => {
+        button.style.transform = 'scale(1.1)';
+    });
+    button.addEventListener('mouseleave', () => {
+        button.style.transform = 'scale(1)';
+    });
+}
+
+// Activer le bouton scroll to top (décommenter pour activer)
+// addScrollToTopButton();
+
+/**
+ * FIN DU FICHIER JAVASCRIPT
  * 
- * Ce fichier CSS utilise une approche mobile-first :
- * - Les styles de base sont conçus pour mobile
- * - Les media queries ajoutent des styles pour tablettes et desktop
+ * RÉSUMÉ DES CONCEPTS UTILISÉS :
+ * ✓ ES6+ (const, let, arrow functions, classes, template literals)
+ * ✓ DOM manipulation moderne
+ * ✓ Event listeners et delegation
+ * ✓ Validation de formulaire robuste
+ * ✓ IntersectionObserver API
+ * ✓ Animation et transitions
+ * ✓ Code modulaire et réutilisable
+ * ✓ Commentaires pédagogiques
+ * ✓ Accessibilité (ARIA, focus management)
+ * ✓ Performance (debouncing, observer)
  * 
- * Organisation du fichier :
- * 1. Reset CSS et styles de base
- * 2. Variables CSS (couleurs, espacements, typographie)
- * 3. Styles globaux
- * 4. Header et navigation
- * 5. Section Hero
- * 6. Section Menu
- * 7. Section Contact
- * 8. Footer
- * 9. Media queries pour le responsive
- */
-
-/* ========================================
-   1. RESET CSS ET STYLES DE BASE
-   ======================================== */
-
-/* 
- * Reset CSS basique pour uniformiser l'affichage sur tous les navigateurs
- * Alternative : on pourrait utiliser normalize.css pour plus de compatibilité
- */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box; /* Facilite le calcul des dimensions (padding inclus) */
-}
-
-/* 
- * Désactivation du smooth scroll pour ceux qui préfèrent les mouvements réduits
- * (accessibilité - respect des préférences utilisateur)
- */
-@media (prefers-reduced-motion: reduce) {
-    * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-}
-
-/* ========================================
-   2. VARIABLES CSS (CUSTOM PROPERTIES)
-   ======================================== */
-
-/* 
- * Les variables CSS permettent de centraliser les valeurs réutilisées
- * Avantages : maintenance facilitée, cohérence visuelle, thèmes dynamiques possibles
- */
-:root {
-    /* PALETTE DE COULEURS - Thème chaud et accueillant */
-    --color-primary: #E67E22;      /* Orange (kebab, chaleur) */
-    --color-primary-dark: #D35400;  /* Orange foncé (hover, accents) */
-    --color-secondary: #8B4513;     /* Marron (authenticité) */
-    --color-accent: #F39C12;        /* Orangé vif (call-to-action) */
-    
-    /* Couleurs neutres */
-    --color-dark: #2C3E50;          /* Texte principal */
-    --color-light: #ECF0F1;         /* Arrière-plan clair */
-    --color-white: #FFFFFF;         /* Blanc pur */
-    --color-beige: #F5E6D3;         /* Beige (douceur) */
-    
-    /* Couleurs de feedback */
-    --color-success: #27AE60;       /* Vert pour succès */
-    --color-error: #E74C3C;         /* Rouge pour erreurs */
-    
-    /* TYPOGRAPHIE */
-    --font-family-base: 'Funnel Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    --font-family-heading: 'Funnel Sans', 'Georgia', serif;
-    
-    --font-size-small: 0.875rem;    /* 14px */
-    --font-size-base: 1rem;         /* 16px */
-    --font-size-medium: 1.125rem;   /* 18px */
-    --font-size-large: 1.5rem;      /* 24px */
-    --font-size-xlarge: 2rem;       /* 32px */
-    --font-size-xxlarge: 2.5rem;    /* 40px */
-    
-    /* ESPACEMENTS - Système d'espacement cohérent basé sur 8px */
-    --spacing-xs: 0.5rem;   /* 8px */
-    --spacing-sm: 1rem;     /* 16px */
-    --spacing-md: 1.5rem;   /* 24px */
-    --spacing-lg: 2rem;     /* 32px */
-    --spacing-xl: 3rem;     /* 48px */
-    --spacing-xxl: 4rem;    /* 64px */
-    
-    /* AUTRES VALEURS */
-    --border-radius: 8px;
-    --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    --transition-speed: 0.3s;
-    
-    /* Largeur maximale du contenu */
-    --container-width: 1200px;
-}
-
-/* ========================================
-   3. STYLES GLOBAUX
-   ======================================== */
-
-/* 
- * Activation du smooth scroll pour la navigation entre sections
- * Améliore l'expérience utilisateur lors du clic sur les liens d'ancre
- */
-html {
-    scroll-behavior: smooth;
-}
-
-/* 
- * Styles de base pour le body
- * Font-size en 16px par défaut (1rem = 16px)
- */
-body {
-    font-family: var(--font-family-base);
-    font-size: var(--font-size-base);
-    line-height: 1.6; /* Espacement entre les lignes pour la lisibilité */
-    color: var(--color-dark);
-    background-color: var(--color-white);
-    overflow-x: hidden; /* Empêche le scroll horizontal */
-}
-
-/* Styles des titres - utilisation d'une police serif pour l'élégance */
-h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-family-heading);
-    line-height: 1.2;
-    color: var(--color-secondary);
-    margin-bottom: var(--spacing-sm);
-}
-
-/* Styles des liens */
-a {
-    color: var(--color-primary);
-    text-decoration: none;
-    transition: color var(--transition-speed);
-}
-
-a:hover {
-    color: var(--color-primary-dark);
-}
-
-/* Styles des images - responsive par défaut */
-img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-}
-
-/* 
- * Container : classe utilitaire pour centrer et limiter la largeur du contenu
- * Utilisation du padding pour les marges internes sur mobile
- */
-.container {
-    max-width: var(--container-width);
-    margin: 0 auto;
-    padding: 0 var(--spacing-sm);
-}
-
-/* ========================================
-   4. HEADER ET NAVIGATION
-   ======================================== */
-
-/* 
- * Header fixe en haut de page
- * Position fixed permet de garder la navigation visible lors du scroll
- */
-.header {
-    background-color: var(--color-white);
-    box-shadow: var(--box-shadow);
-    position: fixed; /* Reste en haut lors du scroll */
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000; /* Au-dessus des autres éléments */
-    transition: transform var(--transition-speed);
-}
-
-/* Navigation flexible */
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--spacing-sm) 0;
-}
-
-/* Logo avec icône et texte */
-.logo {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    font-size: var(--font-size-large);
-    font-weight: bold;
-    color: var(--color-primary);
-}
-
-.logo-icon {
-    font-size: 2rem;
-}
-
-/* 
- * Menu de navigation
- * Par défaut caché sur mobile, visible via le bouton hamburger
- */
-.nav-menu {
-    list-style: none;
-    display: flex;
-    gap: var(--spacing-md);
-    
-    /* Mobile : menu caché par défaut, affiché en colonne */
-    position: fixed;
-    top: 70px;
-    right: -100%; /* Hors écran à droite */
-    width: 70%;
-    max-width: 300px;
-    height: calc(100vh - 70px);
-    background-color: var(--color-white);
-    flex-direction: column;
-    padding: var(--spacing-lg);
-    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
-    transition: right var(--transition-speed);
-    z-index: 999;
-}
-
-/* Menu ouvert sur mobile (classe ajoutée par JavaScript) */
-.nav-menu.active {
-    right: 0;
-}
-
-.nav-link {
-    color: var(--color-dark);
-    font-weight: 500;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: var(--border-radius);
-    transition: all var(--transition-speed);
-}
-
-.nav-link:hover {
-    background-color: var(--color-light);
-    color: var(--color-primary);
-}
-
-/* 
- * Bouton hamburger pour mobile
- * Composé de 3 barres empilées créées avec ::before, l'élément et ::after
- */
-.nav-toggle {
-    display: block; /* Visible uniquement sur mobile */
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: var(--spacing-xs);
-}
-
-.hamburger,
-.hamburger::before,
-.hamburger::after {
-    display: block;
-    width: 25px;
-    height: 3px;
-    background-color: var(--color-primary);
-    border-radius: 3px;
-    transition: all var(--transition-speed);
-}
-
-.hamburger {
-    position: relative;
-}
-
-.hamburger::before,
-.hamburger::after {
-    content: '';
-    position: absolute;
-    left: 0;
-}
-
-.hamburger::before {
-    top: -8px;
-}
-
-.hamburger::after {
-    bottom: -8px;
-}
-
-/* Animation du hamburger en X quand le menu est ouvert */
-.nav-toggle.active .hamburger {
-    background-color: transparent;
-}
-
-.nav-toggle.active .hamburger::before {
-    top: 0;
-    transform: rotate(45deg);
-}
-
-.nav-toggle.active .hamburger::after {
-    bottom: 0;
-    transform: rotate(-45deg);
-}
-
-/* ========================================
-   5. SECTION HERO (ACCUEIL)
-   ======================================== */
-
-/* 
- * Section d'accueil avec image de fond et texte centré
- * Position relative pour positionner l'overlay absolument
- */
-.hero {
-    position: relative;
-    min-height: 100vh; /* Prend toute la hauteur de l'écran */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    color: var(--color-white);
-    padding-top: 70px; /* Compensation pour le header fixe */
-    
-    /* Image de fond avec overlay pour lisibilité du texte */
-    background: 
-        linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
-        url('images/hero-bg.png');
-    /* Fallback gradient si l'image ne charge pas */
-    background-color: var(--color-primary);
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed; /* Effet parallax */
-}
-
-/* Overlay sombre pour améliorer la lisibilité du texte */
-.hero-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.4);
-    z-index: 1;
-}
-
-/* Contenu hero au-dessus de l'overlay */
-.hero-content {
-    position: relative;
-    z-index: 2;
-    max-width: 800px;
-}
-
-.hero-title {
-    font-size: var(--font-size-xxlarge);
-    color: var(--color-white);
-    margin-bottom: var(--spacing-md);
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.hero-subtitle {
-    font-size: var(--font-size-large);
-    margin-bottom: var(--spacing-sm);
-    color: var(--color-beige);
-}
-
-.hero-description {
-    font-size: var(--font-size-medium);
-    margin-bottom: var(--spacing-lg);
-    line-height: 1.8;
-}
-
-/* ========================================
-   6. BOUTONS (COMPOSANTS RÉUTILISABLES)
-   ======================================== */
-
-/* 
- * Classe de base pour tous les boutons
- * Principe DRY (Don't Repeat Yourself)
- */
-.btn {
-    display: inline-block;
-    padding: var(--spacing-sm) var(--spacing-lg);
-    border: none;
-    border-radius: var(--border-radius);
-    font-size: var(--font-size-base);
-    font-weight: 600;
-    text-align: center;
-    cursor: pointer;
-    transition: all var(--transition-speed);
-    text-decoration: none;
-}
-
-/* Bouton principal avec couleur accent */
-.btn-primary {
-    background-color: var(--color-accent);
-    color: var(--color-white);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-}
-
-.btn-primary:hover {
-    background-color: var(--color-primary-dark);
-    transform: translateY(-2px); /* Effet de soulèvement */
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
-    color: var(--color-white);
-}
-
-/* Bouton pleine largeur pour mobile */
-.btn-block {
-    width: 100%;
-    display: block;
-}
-
-/* ========================================
-   7. SECTIONS GÉNÉRALES
-   ======================================== */
-
-/* Espacement vertical entre les sections */
-.menu-section,
-.contact-section {
-    padding: var(--spacing-xxl) 0;
-}
-
-/* Alternance de couleurs de fond pour différencier les sections */
-.menu-section {
-    background-color: var(--color-white);
-}
-
-.contact-section {
-    background-color: var(--color-beige);
-}
-
-/* En-tête de section centré */
-.section-header {
-    text-align: center;
-    margin-bottom: var(--spacing-xl);
-}
-
-.section-title {
-    font-size: var(--font-size-xlarge);
-    color: var(--color-secondary);
-    margin-bottom: var(--spacing-sm);
-}
-
-.section-description {
-    font-size: var(--font-size-medium);
-    color: var(--color-dark);
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-/* ========================================
-   8. SECTION MENU
-   ======================================== */
-
-/* Catégorie de menu */
-.menu-category {
-    margin-bottom: var(--spacing-xl);
-}
-
-.category-title {
-    font-size: var(--font-size-large);
-    color: var(--color-primary);
-    margin-bottom: var(--spacing-md);
-    padding-bottom: var(--spacing-xs);
-    border-bottom: 3px solid var(--color-primary);
-}
-
-/* 
- * Grille de produits utilisant CSS Grid
- * Mobile : 1 colonne, adapté aux petits écrans
- */
-.menu-grid {
-    display: grid;
-    grid-template-columns: 1fr; /* 1 colonne sur mobile */
-    gap: var(--spacing-md);
-}
-
-/* Grille à 4 colonnes pour petits items (ajustée en responsive) */
-.menu-grid-4 {
-    grid-template-columns: 1fr;
-}
-
-/* 
- * Carte de produit
- * Box-shadow pour effet de profondeur
- */
-.menu-item {
-    background-color: var(--color-white);
-    padding: var(--spacing-md);
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
-    position: relative;
-}
-
-/* Effet hover sur les cartes */
-.menu-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-/* Mise en avant pour item populaire */
-.menu-item-highlight {
-    border: 2px solid var(--color-accent);
-    background: linear-gradient(135deg, var(--color-white) 0%, var(--color-beige) 100%);
-}
-
-/* Badge "Populaire" */
-.badge {
-    position: absolute;
-    top: var(--spacing-xs);
-    right: var(--spacing-xs);
-    background-color: var(--color-accent);
-    color: var(--color-white);
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: var(--font-size-small);
-    font-weight: bold;
-}
-
-/* En-tête d'item avec nom et prix */
-.item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: var(--spacing-xs);
-}
-
-.item-name {
-    font-size: var(--font-size-medium);
-    color: var(--color-secondary);
-    flex: 1;
-}
-
-.item-price {
-    font-size: var(--font-size-medium);
-    font-weight: bold;
-    color: var(--color-primary);
-    white-space: nowrap; /* Empêche le prix de se couper */
-    margin-left: var(--spacing-sm);
-}
-
-.item-description {
-    font-size: var(--font-size-small);
-    color: #666;
-    line-height: 1.5;
-}
-
-/* Petits items pour accompagnements/boissons */
-.menu-item-small {
-    padding: var(--spacing-sm);
-}
-
-.menu-item-small .item-name {
-    font-size: var(--font-size-base);
-}
-
-.menu-item-small .item-price {
-    font-size: var(--font-size-base);
-}
-
-/* ========================================
-   9. SECTION CONTACT
-   ======================================== */
-
-/* 
- * Layout à 2 colonnes (mobile : 1 colonne)
- * Utilisation de flexbox pour la disposition
- */
-.contact-wrapper {
-    display: flex;
-    flex-direction: column; /* Colonne sur mobile */
-    gap: var(--spacing-xl);
-}
-
-/* Informations de contact */
-.contact-info {
-    flex: 1;
-}
-
-.contact-info-title,
-.contact-form-title {
-    font-size: var(--font-size-large);
-    margin-bottom: var(--spacing-md);
-    color: var(--color-secondary);
-}
-
-.info-item {
-    display: flex;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-md);
-}
-
-.info-icon {
-    font-size: 1.5rem;
-    flex-shrink: 0; /* Empêche l'icône de rétrécir */
-}
-
-.info-content h4 {
-    color: var(--color-primary);
-    margin-bottom: 0.25rem;
-}
-
-.info-content p {
-    color: var(--color-dark);
-    line-height: 1.6;
-}
-
-.info-content a {
-    color: var(--color-primary);
-    text-decoration: underline;
-}
-
-/* Formulaire de contact */
-.contact-form-wrapper {
-    flex: 1;
-    background-color: var(--color-white);
-    padding: var(--spacing-lg);
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-}
-
-/* 
- * Groupe de champ de formulaire
- * Chaque champ est isolé pour faciliter le styling et les messages d'erreur
- */
-.form-group {
-    margin-bottom: var(--spacing-md);
-}
-
-.form-label {
-    display: block;
-    margin-bottom: var(--spacing-xs);
-    font-weight: 600;
-    color: var(--color-secondary);
-}
-
-.required {
-    color: var(--color-error);
-}
-
-/* 
- * Champs de saisie
- * Styles uniformes pour input, select et textarea
- */
-.form-input {
-    width: 100%;
-    padding: var(--spacing-sm);
-    border: 2px solid #ddd;
-    border-radius: var(--border-radius);
-    font-size: var(--font-size-base);
-    font-family: inherit;
-    transition: border-color var(--transition-speed);
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.1);
-}
-
-/* Zone de texte spécifique */
-.form-textarea {
-    resize: vertical; /* Permet uniquement le redimensionnement vertical */
-    min-height: 120px;
-}
-
-/* États d'erreur et de succès */
-.form-input.error {
-    border-color: var(--color-error);
-}
-
-.form-input.success {
-    border-color: var(--color-success);
-}
-
-/* Messages d'erreur (affichés par JavaScript) */
-.form-error {
-    display: block;
-    color: var(--color-error);
-    font-size: var(--font-size-small);
-    margin-top: 0.25rem;
-    min-height: 1.25rem; /* Réserve l'espace même quand vide */
-}
-
-/* Message de succès global */
-.form-success {
-    display: none; /* Caché par défaut */
-    background-color: var(--color-success);
-    color: var(--color-white);
-    padding: var(--spacing-md);
-    border-radius: var(--border-radius);
-    margin-bottom: var(--spacing-md);
-    text-align: center;
-}
-
-.form-success.show {
-    display: block;
-}
-
-/* ========================================
-   10. FOOTER
-   ======================================== */
-
-.footer {
-    background-color: var(--color-secondary);
-    color: var(--color-white);
-    padding: var(--spacing-xl) 0 var(--spacing-md);
-}
-
-/* Grille du footer */
-.footer-content {
-    display: grid;
-    grid-template-columns: 1fr; /* 1 colonne sur mobile */
-    gap: var(--spacing-lg);
-    margin-bottom: var(--spacing-lg);
-}
-
-.footer-title {
-    color: var(--color-accent);
-    font-size: var(--font-size-medium);
-    margin-bottom: var(--spacing-sm);
-}
-
-.footer-text {
-    line-height: 1.6;
-    color: var(--color-light);
-}
-
-/* Liste de liens du footer */
-.footer-links {
-    list-style: none;
-}
-
-.footer-links li {
-    margin-bottom: var(--spacing-xs);
-}
-
-.footer-links a {
-    color: var(--color-light);
-    transition: color var(--transition-speed);
-}
-
-.footer-links a:hover {
-    color: var(--color-accent);
-}
-
-/* Liens réseaux sociaux */
-.social-links {
-    display: flex;
-    gap: var(--spacing-sm);
-}
-
-.social-link {
-    font-size: 1.5rem;
-    transition: transform var(--transition-speed);
-}
-
-.social-link:hover {
-    transform: scale(1.2);
-}
-
-/* Bas du footer */
-.footer-bottom {
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    padding-top: var(--spacing-md);
-    text-align: center;
-    color: var(--color-light);
-    font-size: var(--font-size-small);
-}
-
-.footer-note {
-    margin-top: var(--spacing-xs);
-    font-style: italic;
-    opacity: 0.8;
-}
-
-/* ========================================
-   11. SHOPPING CART SYSTEM
-   ======================================== */
-
-/* Section du panier */
-.cart-section {
-    background-color: var(--color-light);
-    padding: var(--spacing-lg) 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-/* Wrapper du panier */
-.cart-wrapper {
-    max-width: 800px;
-    margin: 0 auto;
-    background-color: var(--color-white);
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-    overflow: hidden;
-}
-
-/* En-tête du panier */
-.cart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--spacing-md);
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-    color: var(--color-white);
-}
-
-.cart-title {
-    margin: 0;
-    font-size: var(--font-size-large);
-    font-weight: 600;
-}
-
-/* Bouton toggle du panier */
-.cart-toggle {
-    background: rgba(255, 255, 255, 0.2);
-    border: 2px solid var(--color-white);
-    color: var(--color-white);
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: 25px;
-    cursor: pointer;
-    transition: all var(--transition-speed);
-    font-weight: 600;
-    min-width: 60px;
-}
-
-.cart-toggle:hover {
-    background: var(--color-white);
-    color: var(--color-primary);
-    transform: scale(1.05);
-}
-
-.cart-count {
-    font-size: 1.1rem;
-    font-weight: bold;
-}
-
-/* Contenu du panier */
-.cart-content {
-    padding: var(--spacing-md);
-}
-
-/* Liste des articles */
-.cart-items {
-    margin-bottom: var(--spacing-md);
-}
-
-.cart-empty {
-    text-align: center;
-    color: #666;
-    font-style: italic;
-    margin: var(--spacing-lg) 0;
-}
-
-/* Article individuel dans le panier */
-.cart-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--spacing-sm) 0;
-    border-bottom: 1px solid var(--color-light);
-}
-
-.cart-item:last-child {
-    border-bottom: none;
-}
-
-.cart-item-info {
-    flex: 1;
-}
-
-.cart-item-name {
-    font-weight: 600;
-    color: var(--color-secondary);
-    margin-bottom: 0.25rem;
-}
-
-.cart-item-price {
-    font-size: var(--font-size-small);
-    color: var(--color-primary);
-    font-weight: 500;
-}
-
-/* Contrôles de quantité */
-.quantity-controls {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    margin-left: var(--spacing-sm);
-}
-
-.quantity-btn {
-    background: var(--color-primary);
-    color: var(--color-white);
-    border: none;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-weight: bold;
-    transition: all var(--transition-speed);
-}
-
-.quantity-btn:hover {
-    background: var(--color-primary-dark);
-    transform: scale(1.1);
-}
-
-.quantity-btn:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.quantity-display {
-    font-weight: 600;
-    min-width: 30px;
-    text-align: center;
-    padding: 0.25rem 0.5rem;
-    background: var(--color-light);
-    border-radius: var(--border-radius);
-}
-
-.remove-item {
-    background: var(--color-error);
-    color: var(--color-white);
-    border: none;
-    padding: 0.25rem 0.5rem;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    font-size: var(--font-size-small);
-    transition: all var(--transition-speed);
-    margin-left: var(--spacing-sm);
-}
-
-.remove-item:hover {
-    background: #c0392b;
-    transform: scale(1.05);
-}
-
-/* Résumé du panier */
-.cart-summary {
-    border-top: 2px solid var(--color-light);
-    padding-top: var(--spacing-md);
-    margin-top: var(--spacing-md);
-}
-
-.cart-total {
-    font-size: var(--font-size-large);
-    text-align: center;
-    margin-bottom: var(--spacing-md);
-    padding: var(--spacing-sm);
-    background: var(--color-beige);
-    border-radius: var(--border-radius);
-    color: var(--color-secondary);
-}
-
-/* Boutons "Ajouter au panier" */
-.btn-add-to-cart {
-    background: var(--color-accent);
-    color: var(--color-white);
-    border: none;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: var(--border-radius);
-    font-size: var(--font-size-small);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--transition-speed);
-    margin-top: var(--spacing-xs);
-    width: 100%;
-    font-family: inherit;
-}
-
-.btn-add-to-cart:hover {
-    background: var(--color-primary-dark);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.btn-add-to-cart:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* Bouton petit pour les items compacts */
-.btn-small {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-}
-
-/* Animation d'ajout au panier */
-.btn-add-to-cart.adding {
-    background: var(--color-success);
-    transform: scale(0.95);
-}
-
-.btn-add-to-cart.adding::after {
-    content: " ✓";
-}
-
-/* Effet de feedback visuel */
-.cart-bounce {
-    animation: cartBounce 0.3s ease-in-out;
-}
-
-@keyframes cartBounce {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-}
-
-/* Badge de notification sur le panier */
-.cart-notification {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: var(--color-error);
-    color: var(--color-white);
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    font-size: 0.7rem;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-}
-
-/* ========================================
-   12. MEDIA QUERIES - RESPONSIVE DESIGN
-   ======================================== */
-
-/* 
- * TABLETTE (min-width: 768px)
- * À partir de 768px, on passe à une mise en page plus large
- */
-@media (min-width: 768px) {
-    /* Conteneur avec plus de padding */
-    .container {
-        padding: 0 var(--spacing-lg);
-    }
-    
-    /* Navigation en ligne sur tablette/desktop */
-    .nav-menu {
-        position: static;
-        flex-direction: row;
-        width: auto;
-        height: auto;
-        background-color: transparent;
-        padding: 0;
-        box-shadow: none;
-    }
-    
-    /* Masquer le bouton hamburger sur desktop */
-    .nav-toggle {
-        display: none;
-    }
-    
-    /* Hero avec tailles de police augmentées */
-    .hero-title {
-        font-size: 3rem;
-    }
-    
-    .hero-subtitle {
-        font-size: 1.75rem;
-    }
-    
-    /* Menu en 2 colonnes */
-    .menu-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .menu-grid-4 {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    /* Contact en 2 colonnes côte à côte */
-    .contact-wrapper {
-        flex-direction: row;
-    }
-    
-    /* Footer en 2 colonnes */
-    .footer-content {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-/* 
- * DESKTOP (min-width: 1024px)
- * Layout complet pour grands écrans
- */
-@media (min-width: 1024px) {
-    /* Hero encore plus grand */
-    .hero-title {
-        font-size: 3.5rem;
-    }
-    
-    /* Menu en 3 colonnes */
-    .menu-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-    
-    /* Petits items en 4 colonnes */
-    .menu-grid-4 {
-        grid-template-columns: repeat(4, 1fr);
-    }
-    
-    /* Footer en 4 colonnes */
-    .footer-content {
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
-
-/* 
- * TRÈS GRANDS ÉCRANS (min-width: 1440px)
- * Optimisations pour très grands écrans
- */
-@media (min-width: 1440px) {
-    :root {
-        --font-size-base: 1.125rem; /* Légère augmentation de la taille de base */
-    }
-}
-
-/* ========================================
-   12. ANIMATIONS ET EFFETS SPÉCIAUX
-   ======================================== */
-
-/* Animation de fondu pour les éléments au chargement */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Application de l'animation aux cartes du menu */
-.menu-item {
-    animation: fadeIn 0.5s ease-out;
-}
-
-/* Délai progressif pour effet cascade */
-.menu-item:nth-child(1) { animation-delay: 0.1s; }
-.menu-item:nth-child(2) { animation-delay: 0.2s; }
-.menu-item:nth-child(3) { animation-delay: 0.3s; }
-.menu-item:nth-child(4) { animation-delay: 0.4s; }
-
-/* ========================================
-   13. CLASSES UTILITAIRES
-   ======================================== */
-
-/* Classes pour espacement rapide */
-.mt-1 { margin-top: var(--spacing-xs); }
-.mt-2 { margin-top: var(--spacing-sm); }
-.mt-3 { margin-top: var(--spacing-md); }
-.mt-4 { margin-top: var(--spacing-lg); }
-
-.mb-1 { margin-bottom: var(--spacing-xs); }
-.mb-2 { margin-bottom: var(--spacing-sm); }
-.mb-3 { margin-bottom: var(--spacing-md); }
-.mb-4 { margin-bottom: var(--spacing-lg); }
-
-/* Alignement du texte */
-.text-center { text-align: center; }
-.text-left { text-align: left; }
-.text-right { text-align: right; }
-
-/* Visibilité */
-.hidden { display: none; }
-.visible { display: block; }
-
-/* 
- * FIN DU FICHIER CSS
- * 
- * NOTES POUR LES ÉTUDIANTS :
- * - Ce CSS utilise des pratiques modernes (Grid, Flexbox, variables CSS)
- * - L'approche mobile-first facilite la maintenance
- * - Les noms de classes suivent la convention BEM (Block Element Modifier)
- * - Les commentaires expliquent le "pourquoi" pas seulement le "quoi"
- * - Le code est organisé logiquement de haut en bas
+ * EXERCICES POUR LES ÉTUDIANTS :
+ * 1. Ajouter la sauvegarde des données du formulaire dans localStorage
+ * 2. Implémenter un système de filtrage pour le menu
+ * 3. Ajouter une fonctionnalité de "favoris" pour les plats
+ * 4. Créer un panier de commande avec calcul du total
+ * 5. Ajouter une galerie d'images avec lightbox
  */
