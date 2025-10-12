@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <!-- Métadonnées essentielles pour le référencement et l'affichage -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Le Kebab du Campus - Restaurant kebab pour étudiants. Découvrez nos délicieux kebabs, sandwiches et menus à prix étudiants.">
+    <meta name="keywords" content="kebab, restaurant, étudiant, campus, sandwich, menu">
+    <title>Le Kebab du Campus - Restaurant Kebab Étudiant</title>
+    
+    <!-- Google Fonts - Funnel Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Funnel+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lien vers la feuille de style externe -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- HEADER : En-tête du site avec logo et navigation principale -->
+    <!-- Utilisation de la balise <header> pour identifier sémantiquement l'en-tête -->
+    <header class="header" id="header">
+        <div class="container">
+            <nav class="navbar">
+                <!-- Logo et nom du restaurant -->
+                <div class="logo">
+                    <span class="logo-icon">🥙</span>
+                    <span class="logo-text">Le Kebab du Campus</span>
+                </div>
+                
+                <!-- Bouton hamburger pour mobile (caché sur desktop) -->
+                <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                    <span class="hamburger"></span>
+                </button>
+                
+                <!-- Menu de navigation - utilisation de <nav> pour la sémantique -->
+                <!-- Les liens internes utilisent des ancres (#) pour la navigation fluide -->
+                <ul class="nav-menu" id="navMenu">
+                    <li><a href="#accueil" class="nav-link">Accueil</a></li>
+                    <li><a href="#menu" class="nav-link">Menu</a></li>
+                    <li><a href="#contact" class="nav-link">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- MAIN : Contenu principal de la page -->
+    <!-- Utilisation de <main> pour identifier le contenu principal (important pour l'accessibilité) -->
+    <main>
+        <!-- SECTION HERO : Section d'accueil avec message principal -->
+        <!-- Utilisation de <section> avec id pour créer des sections identifiables -->
+        <section class="hero" id="accueil">
+            <div class="hero-overlay"></div>
+            <div class="container hero-content">
+                <h1 class="hero-title">Bienvenue au Kebab du Campus</h1>
+                <p class="hero-subtitle">Des saveurs authentiques à prix étudiants</p>
+                <p class="hero-description">
+                    Le meilleur kebab près de votre campus. Produits frais, préparation rapide, 
+                    et des prix adaptés aux budgets étudiants.
+                </p>
+                <!-- Bouton call-to-action qui scrolle vers le menu -->
+                <a href="#menu" class="btn btn-primary">Découvrir le Menu</a>
+            </div>
+        </section>
+
+        <!-- SECTION PANIER : Panier d'achat -->
+        <section class="cart-section" id="cart">
+            <div class="container">
+                <div class="cart-wrapper">
+                    <div class="cart-header">
+                        <h3 class="cart-title">🛒 Mon Panier</h3>
+                        <button class="cart-toggle" id="cartToggle">
+                            <span class="cart-count" id="cartCount">0</span>
+                        </button>
+                    </div>
+                    
+                    <div class="cart-content" id="cartContent">
+                        <div class="cart-items" id="cartItems">
+                            <p class="cart-empty" id="cartEmpty">Votre panier est vide</p>
+                        </div>
+                        
+                        <div class="cart-summary" id="cartSummary" style="display: none;">
+                            <div class="cart-total">
+                                <strong>Total: <span id="cartTotal">0.00€</span></strong>
+                            </div>
+                            <button class="btn btn-primary btn-block" id="checkoutBtn">
+                                Commander Maintenant
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION MENU : Présentation des produits et prix -->
+        <section class="menu-section" id="menu">
+            <div class="container">
+                <!-- En-tête de section avec titre et description -->
+                <div class="section-header">
+                    <h2 class="section-title">Menu</h2>
+                    <p class="section-description">
+                        Découvrez notre sélection de plats préparés avec des ingrédients frais
+                    </p>
+                </div>
+
+                <!-- CATÉGORIE 1 : KEBABS -->
+                <!-- Utilisation de <article> pour chaque catégorie (contenu autonome) -->
+                <article class="menu-category">
+                    <h3 class="category-title">🥙 Nos Kebabs</h3>
+                    <!-- Grille de produits utilisant CSS Grid/Flexbox -->
+                    <div class="menu-grid">
+                        <!-- Chaque produit est une carte (card) -->
+                        <div class="menu-item" data-name="Kebab Classique" data-price="6.50" data-category="kebab">
+                            <div class="item-header">
+                                <h4 class="item-name">Kebab Classique</h4>
+                                <span class="item-price">6.50€</span>
+                            </div>
+                            <p class="item-description">
+                                Viande d'agneau ou poulet marinée, salade, tomates, oignons, sauce blanche
+                            </p>
+                            <button class="btn-add-to-cart">Ajouter au panier</button>
+                        </div>
+
+                        <div class="menu-item" data-name="Kebab Complet" data-price="7.50" data-category="kebab">
+                            <div class="item-header">
+                                <h4 class="item-name">Kebab Complet</h4>
+                                <span class="item-price">7.50€</span>
+                            </div>
+                            <p class="item-description">
+                                Kebab classique + frites + fromage
+                            </p>
+                            <button class="btn-add-to-cart">Ajouter au panier</button>
+                        </div>
+
+                        <div class="menu-item menu-item-highlight" data-name="Kebab Menu Étudiant" data-price="9.00" data-category="kebab">
+                            <span class="badge">Populaire</span>
+                            <div class="item-header">
+                                <h4 class="item-name">Kebab Menu Étudiant</h4>
+                                <span class="item-price">9.00€</span>
+                            </div>
+                            <p class="item-description">
+                                Kebab complet + boisson 33cl + dessert au choix
+                            </p>
+                            <button class="btn-add-to-cart">Ajouter au panier</button>
+                        </div>
+
+                        <div class="menu-item" data-name="Kebab Végétarien" data-price="6.00" data-category="kebab">
+                            <div class="item-header">
+                                <h4 class="item-name">Kebab Végétarien</h4>
+                                <span class="item-price">6.00€</span>
+                            </div>
+                            <p class="item-description">
+                                Falafels, salade, tomates, oignons, houmous, sauce blanche
+                            </p>
+                            <button class="btn-add-to-cart">Ajouter au panier</button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- CATÉGORIE 2 : SANDWICHES -->
+                <article class="menu-category">
+                    <h3 class="category-title">🥪 Sandwiches & Wraps</h3>
+                    <div class="menu-grid">
+                        <div class="menu-item" data-name="Wrap Poulet" data-price="5.50" data-category="sandwich">
+                            <div class="item-header">
+                                <h4 class="item-name">Wrap Poulet</h4>
+                                <span class="item-price">5.50€</span>
+                            </div>
+                            <p class="item-description">
+                                Poulet grillé, crudités, sauce curry
+                            </p>
+                            <button class="btn-add-to-cart">Ajouter au panier</button>
+                        </div>
+
+                        <div class="menu-item" data-name="Tacos 3 Viandes" data-price="7.00" data-category="sandwich">
+                            <div class="item-header">
+                                <h4 class="item-name">Tacos 3 Viandes</h4>
+                                <span class="item-price">7.00€</span>
+                            </div>
+                            <p class="item-description">
+                                Choix de 3 viandes, frites, fromage, sauce au choix
+                            </p>
+                            <button class="btn-add-to-cart">Ajouter au panier</button>
+                        </div>
+
+                        <div class="menu-item" data-name="Panini Merguez" data-price="5.00" data-category="sandwich">
+                            <div class="item-header">
+                                <h4 class="item-name">Panini Merguez</h4>
+                                <span class="item-price">5.00€</span>
+                            </div>
+                            <p class="item-description">
+                                Merguez grillées, fromage, harissa
+                            </p>
+                            <button class="btn-add-to-cart">Ajouter au panier</button>
+                        </div>
+
+                        <div class="menu-item" data-name="Assiette Kebab" data-price="8.50" data-category="sandwich">
+                            <div class="item-header">
+                                <h4 class="item-name">Assiette Kebab</h4>
+                                <span class="item-price">8.50€</span>
+                            </div>
+                            <p class="item-description">
+                                Viande kebab sur riz ou frites, salade, sauce
+                            </p>
+                            <button class="btn-add-to-cart">Ajouter au panier</button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- CATÉGORIE 3 : ACCOMPAGNEMENTS -->
+                <article class="menu-category">
+                    <h3 class="category-title">🍟 Accompagnements</h3>
+                    <div class="menu-grid menu-grid-4">
+                        <div class="menu-item menu-item-small" data-name="Frites" data-price="3.00" data-category="accompagnement">
+                            <div class="item-header">
+                                <h4 class="item-name">Frites</h4>
+                                <span class="item-price">3.00€</span>
+                            </div>
+                            <button class="btn-add-to-cart btn-small">Ajouter</button>
+                        </div>
+
+                        <div class="menu-item menu-item-small" data-name="Potatoes" data-price="3.50" data-category="accompagnement">
+                            <div class="item-header">
+                                <h4 class="item-name">Potatoes</h4>
+                                <span class="item-price">3.50€</span>
+                            </div>
+                            <button class="btn-add-to-cart btn-small">Ajouter</button>
+                        </div>
+
+                        <div class="menu-item menu-item-small" data-name="Nuggets (6 pcs)" data-price="4.00" data-category="accompagnement">
+                            <div class="item-header">
+                                <h4 class="item-name">Nuggets (6 pcs)</h4>
+                                <span class="item-price">4.00€</span>
+                            </div>
+                            <button class="btn-add-to-cart btn-small">Ajouter</button>
+                        </div>
+
+                        <div class="menu-item menu-item-small" data-name="Salade" data-price="2.50" data-category="accompagnement">
+                            <div class="item-header">
+                                <h4 class="item-name">Salade</h4>
+                                <span class="item-price">2.50€</span>
+                            </div>
+                            <button class="btn-add-to-cart btn-small">Ajouter</button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- CATÉGORIE 4 : BOISSONS -->
+                <article class="menu-category">
+                    <h3 class="category-title">🥤 Boissons</h3>
+                    <div class="menu-grid menu-grid-4">
+                        <div class="menu-item menu-item-small" data-name="Soda 33cl" data-price="2.00" data-category="boisson">
+                            <div class="item-header">
+                                <h4 class="item-name">Soda 33cl</h4>
+                                <span class="item-price">2.00€</span>
+                            </div>
+                            <button class="btn-add-to-cart btn-small">Ajouter</button>
+                        </div>
+
+                        <div class="menu-item menu-item-small" data-name="Soda 50cl" data-price="2.50" data-category="boisson">
+                            <div class="item-header">
+                                <h4 class="item-name">Soda 50cl</h4>
+                                <span class="item-price">2.50€</span>
+                            </div>
+                            <button class="btn-add-to-cart btn-small">Ajouter</button>
+                        </div>
+
+                        <div class="menu-item menu-item-small" data-name="Jus de fruits" data-price="2.50" data-category="boisson">
+                            <div class="item-header">
+                                <h4 class="item-name">Jus de fruits</h4>
+                                <span class="item-price">2.50€</span>
+                            </div>
+                            <button class="btn-add-to-cart btn-small">Ajouter</button>
+                        </div>
+
+                        <div class="menu-item menu-item-small" data-name="Eau minérale" data-price="1.50" data-category="boisson">
+                            <div class="item-header">
+                                <h4 class="item-name">Eau minérale</h4>
+                                <span class="item-price">1.50€</span>
+                            </div>
+                            <button class="btn-add-to-cart btn-small">Ajouter</button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- CATÉGORIE 5 : DESSERTS -->
+                <article class="menu-category">
+                    <h3 class="category-title">🍰 Desserts</h3>
+                    <div class="menu-grid menu-grid-4">
+                        <div class="menu-item menu-item-small" data-name="Baklava" data-price="2.50" data-category="dessert">
+                            <div class="item-header">
+                                <h4 class="item-name">Baklava</h4>
+                                <span class="item-price">2.50€</span>
+                            </div>
+                            <button class="btn-add-to-cart btn-small">Ajouter</button>
+                        </div>
+
+                        <div class="menu-item menu-item-small" data-name="Tiramisu" data-price="3.00" data-category="dessert">
+                            <div class="item-header">
+                                <h4 class="item-name">Tiramisu</h4>
+                                <span class="item-price">3.00€</span>
+                            </div>
+                            <button class="btn-add-to-cart btn-small">Ajouter</button>
+                        </div>
+
+                        <div class="menu-item menu-item-small" data-name="Brownie" data-price="2.50" data-category="dessert">
+                            <div class="item-header">
+                                <h4 class="item-name">Brownie</h4>
+                                <span class="item-price">2.50€</span>
+                            </div>
+                            <button class="btn-add-to-cart btn-small">Ajouter</button>
+                        </div>
+
+                        <div class="menu-item menu-item-small" data-name="Glace (2 boules)" data-price="3.50" data-category="dessert">
+                            <div class="item-header">
+                                <h4 class="item-name">Glace (2 boules)</h4>
+                                <span class="item-price">3.50€</span>
+                            </div>
+                            <button class="btn-add-to-cart btn-small">Ajouter</button>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- SECTION CONTACT : Informations et formulaire de contact -->
+        <section class="contact-section" id="contact">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Contactez-nous</h2>
+                    <p class="section-description">
+                        Une question ? Une réservation ? N'hésitez pas à nous contacter
+                    </p>
+                </div>
+
+                <!-- Disposition en 2 colonnes : informations + formulaire -->
+                <div class="contact-wrapper">
+                    <!-- COLONNE 1 : Informations de contact -->
+                    <div class="contact-info">
+                        <h3 class="contact-info-title">Nos Informations</h3>
+                        
+                        <!-- Utilisation de listes pour structurer les informations -->
+                        <div class="info-item">
+                            <span class="info-icon">📍</span>
+                            <div class="info-content">
+                                <h4>Adresse</h4>
+                                <p>15 Avenue du Campus<br>69000 Lyon, France</p>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-icon">📞</span>
+                            <div class="info-content">
+                                <h4>Téléphone</h4>
+                                <p><a href="tel:+33472123456">04 72 12 34 56</a></p>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-icon">✉️</span>
+                            <div class="info-content">
+                                <h4>Email</h4>
+                                <p><a href="mailto:contact@kebabducampus.fr">contact@kebabducampus.fr</a></p>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-icon">🕒</span>
+                            <div class="info-content">
+                                <h4>Horaires d'ouverture</h4>
+                                <p>
+                                    <strong>Lundi - Vendredi :</strong> 11h00 - 23h00<br>
+                                    <strong>Samedi - Dimanche :</strong> 12h00 - 00h00
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COLONNE 2 : Formulaire de contact/réservation -->
+                    <!-- Utilisation de la balise <form> avec attributs appropriés -->
+                    <div class="contact-form-wrapper">
+                        <h3 class="contact-form-title">Formulaire de Contact</h3>
+                        
+                        <!-- L'attribut novalidate désactive la validation HTML5 native 
+                             car nous utilisons une validation JavaScript personnalisée -->
+                        <form class="contact-form" id="contactForm" novalidate>
+                            <!-- Chaque champ est dans un groupe pour faciliter le styling et les messages d'erreur -->
+                            <div class="form-group">
+                                <label for="name" class="form-label">
+                                    Nom complet <span class="required">*</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="name" 
+                                    name="name" 
+                                    class="form-input" 
+                                    placeholder="Votre nom"
+                                    required
+                                    aria-required="true"
+                                >
+                                <!-- Conteneur pour les messages d'erreur (rempli dynamiquement par JS) -->
+                                <span class="form-error" id="nameError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email" class="form-label">
+                                    Email <span class="required">*</span>
+                                </label>
+                                <input 
+                                    type="email" 
+                                    id="email" 
+                                    name="email" 
+                                    class="form-input" 
+                                    placeholder="votre.email@example.com"
+                                    required
+                                    aria-required="true"
+                                >
+                                <span class="form-error" id="emailError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="phone" class="form-label">
+                                    Téléphone <span class="required">*</span>
+                                </label>
+                                <input 
+                                    type="tel" 
+                                    id="phone" 
+                                    name="phone" 
+                                    class="form-input" 
+                                    placeholder="06 12 34 56 78"
+                                    required
+                                    aria-required="true"
+                                >
+                                <span class="form-error" id="phoneError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="subject" class="form-label">
+                                    Sujet <span class="required">*</span>
+                                </label>
+                                <!-- Menu déroulant pour catégoriser les demandes -->
+                                <select 
+                                    id="subject" 
+                                    name="subject" 
+                                    class="form-input"
+                                    required
+                                    aria-required="true"
+                                >
+                                    <option value="">Sélectionnez un sujet</option>
+                                    <option value="reservation">Réservation</option>
+                                    <option value="info">Demande d'information</option>
+                                    <option value="suggestion">Suggestion</option>
+                                    <option value="reclamation">Réclamation</option>
+                                    <option value="autre">Autre</option>
+                                </select>
+                                <span class="form-error" id="subjectError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="message" class="form-label">
+                                    Message <span class="required">*</span>
+                                </label>
+                                <!-- Zone de texte pour le message -->
+                                <textarea 
+                                    id="message" 
+                                    name="message" 
+                                    class="form-input form-textarea" 
+                                    rows="5" 
+                                    placeholder="Votre message..."
+                                    required
+                                    aria-required="true"
+                                ></textarea>
+                                <span class="form-error" id="messageError"></span>
+                            </div>
+
+                            <!-- Message de succès (caché par défaut, affiché par JS après soumission) -->
+                            <div class="form-success" id="formSuccess">
+                                ✓ Votre message a été envoyé avec succès ! Nous vous répondrons dans les plus brefs délais.
+                            </div>
+
+                            <!-- Bouton de soumission -->
+                            <button type="submit" class="btn btn-primary btn-block">
+                                Envoyer le message
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER : Pied de page avec informations complémentaires -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <!-- Informations du restaurant -->
+                <div class="footer-section">
+                    <h4 class="footer-title">Le Kebab du Campus</h4>
+                    <p class="footer-text">
+                        Votre restaurant kebab de confiance près du campus. 
+                        Des produits frais et de qualité depuis 2015.
+                    </p>
+                </div>
+
+                <!-- Liens rapides -->
+                <div class="footer-section">
+                    <h4 class="footer-title">Liens rapides</h4>
+                    <ul class="footer-links">
+                        <li><a href="#accueil">Accueil</a></li>
+                        <li><a href="#menu">Menu</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+
+                <!-- Horaires résumés -->
+                <div class="footer-section">
+                    <h4 class="footer-title">Horaires</h4>
+                    <p class="footer-text">
+                        Lundi - Vendredi : 11h - 23h<br>
+                        Week-end : 12h - 00h
+                    </p>
+                </div>
+
+                <!-- Réseaux sociaux (exemple) -->
+                <div class="footer-section">
+                    <h4 class="footer-title">Suivez-nous</h4>
+                    <div class="social-links">
+                        <a href="#" class="social-link" aria-label="Facebook">📘</a>
+                        <a href="#" class="social-link" aria-label="Instagram">📷</a>
+                        <a href="#" class="social-link" aria-label="Twitter">🐦</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="footer-bottom">
+                <p>&copy; 2024 Le Kebab du Campus. Tous droits réservés.</p>
+                <p class="footer-note">Site créé à des fins pédagogiques pour les étudiants en informatique de gestion</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Lien vers le fichier JavaScript externe -->
+    <!-- L'attribut defer permet de charger le script après le parsing du HTML -->
+    <script src="script.js" defer></script>
+</body>
+</html>
