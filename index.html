@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Le Kebab du Campus - Restaurant kebab pour étudiants. Découvrez nos délicieux kebabs, sandwiches et menus à prix étudiants.">
     <meta name="keywords" content="kebab, restaurant, étudiant, campus, sandwich, menu">
-    <title>Le Kebab du Campus - Restaurant Kebab Étudiant</title>
+    <title>Kebab du Coin - Restaurant</title>
     
     <!-- Google Fonts - Funnel Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,6 +15,30 @@
     
     <!-- Lien vers la feuille de style externe -->
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .navbar {
+            /* garantit l’alignement vertical du logo avec le menu */
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            padding-right: 1.5rem;
+        }
+
+        .logo-image {
+            display: block;
+            height: clamp(47px, 8vh, 83px);
+            width: auto;
+            transform: scale(2.2);
+            transform-origin: left center;
+        }
+
+        .contact-form .form-group {
+            margin-bottom: 0.75rem;
+        }
+    </style>
 </head>
 <body>
     <!-- HEADER : En-tête du site avec logo et navigation principale -->
@@ -24,8 +48,7 @@
             <nav class="navbar">
                 <!-- Logo et nom du restaurant -->
                 <div class="logo">
-                    <span class="logo-icon">🥙</span>
-                    <span class="logo-text">Le Kebab du Campus</span>
+                    <img src="images/logo.png" alt="Kebab du Coin" class="logo-image">
                 </div>
                 
                 <!-- Bouton hamburger pour mobile (caché sur desktop) -->
@@ -49,46 +72,17 @@
     <main>
         <!-- SECTION HERO : Section d'accueil avec message principal -->
         <!-- Utilisation de <section> avec id pour créer des sections identifiables -->
-        <section class="hero" id="accueil">
+        <section class="hero" id="accueil" style="background-image: url('images/background.png');">
             <div class="hero-overlay"></div>
             <div class="container hero-content">
-                <h1 class="hero-title">Bienvenue au Kebab du Campus</h1>
+                <h1 class="hero-title">Bienvenue au Kebab du Coin</h1>
                 <p class="hero-subtitle">Des saveurs authentiques à prix étudiants</p>
                 <p class="hero-description">
-                    Le meilleur kebab près de votre campus. Produits frais, préparation rapide, 
-                    et des prix adaptés aux budgets étudiants.
+                    Le meilleur kebab de Lausanne. Produits frais, préparation rapide 
+                    et des prix adaptés à tous les budgets.
                 </p>
                 <!-- Bouton call-to-action qui scrolle vers le menu -->
                 <a href="#menu" class="btn btn-primary">Découvrir le Menu</a>
-            </div>
-        </section>
-
-        <!-- SECTION PANIER : Panier d'achat -->
-        <section class="cart-section" id="cart">
-            <div class="container">
-                <div class="cart-wrapper">
-                    <div class="cart-header">
-                        <h3 class="cart-title">🛒 Mon Panier</h3>
-                        <button class="cart-toggle" id="cartToggle">
-                            <span class="cart-count" id="cartCount">0</span>
-                        </button>
-                    </div>
-                    
-                    <div class="cart-content" id="cartContent">
-                        <div class="cart-items" id="cartItems">
-                            <p class="cart-empty" id="cartEmpty">Votre panier est vide</p>
-                        </div>
-                        
-                        <div class="cart-summary" id="cartSummary" style="display: none;">
-                            <div class="cart-total">
-                                <strong>Total: <span id="cartTotal">0.00€</span></strong>
-                            </div>
-                            <button class="btn btn-primary btn-block" id="checkoutBtn">
-                                Commander Maintenant
-                            </button>
-                        </div>
-                    </div>
-                </div>
             </div>
         </section>
 
@@ -110,47 +104,58 @@
                     <!-- Grille de produits utilisant CSS Grid/Flexbox -->
                     <div class="menu-grid">
                         <!-- Chaque produit est une carte (card) -->
-                        <div class="menu-item" data-name="Kebab Classique" data-price="6.50" data-category="kebab">
-                            <div class="item-header">
-                                <h4 class="item-name">Kebab Classique</h4>
-                                <span class="item-price">6.50€</span>
-                            </div>
-                            <p class="item-description">
-                                Viande d'agneau ou poulet marinée, salade, tomates, oignons, sauce blanche
-                            </p>
-                            <button class="btn-add-to-cart">Ajouter au panier</button>
-                        </div>
-
-                        <div class="menu-item" data-name="Kebab Complet" data-price="7.50" data-category="kebab">
-                            <div class="item-header">
-                                <h4 class="item-name">Kebab Complet</h4>
-                                <span class="item-price">7.50€</span>
-                            </div>
-                            <p class="item-description">
-                                Kebab classique + frites + fromage
-                            </p>
-                            <button class="btn-add-to-cart">Ajouter au panier</button>
-                        </div>
-
                         <div class="menu-item menu-item-highlight" data-name="Kebab Menu Étudiant" data-price="9.00" data-category="kebab">
                             <span class="badge">Populaire</span>
                             <div class="item-header">
-                                <h4 class="item-name">Kebab Menu Étudiant</h4>
-                                <span class="item-price">9.00€</span>
+                                <h4 class="item-name">Kebab Menu</h4>
+                                <span class="item-price">14.00 CHF</span>
                             </div>
                             <p class="item-description">
-                                Kebab complet + boisson 33cl + dessert au choix
+                                Kebab à choix + soda 33cl
+                            </p>
+                            <button class="btn-add-to-cart">Ajouter au panier</button>
+                        </div>
+                    
+                        <div class="menu-item" data-name="Kebab Agneau" data-price="6.50" data-category="kebab">
+                            <div class="item-header">
+                                <h4 class="item-name">Kebab Agneau</h4>
+                                <span class="item-price">11.00 CHF</span>
+                            </div>
+                            <p class="item-description">
+                                Viande d'agneau, salade, tomates, oignons, sauce blanche
                             </p>
                             <button class="btn-add-to-cart">Ajouter au panier</button>
                         </div>
 
-                        <div class="menu-item" data-name="Kebab Végétarien" data-price="6.00" data-category="kebab">
+                        <div class="menu-item" data-name="Kebab Poulet" data-price="7.50" data-category="kebab">
                             <div class="item-header">
-                                <h4 class="item-name">Kebab Végétarien</h4>
-                                <span class="item-price">6.00€</span>
+                                <h4 class="item-name">Kebab Poulet</h4>
+                                <span class="item-price">11.00 CHF</span>
                             </div>
                             <p class="item-description">
-                                Falafels, salade, tomates, oignons, houmous, sauce blanche
+                                Viande de poulet, salade, tomates, oignons, sauce blanche
+                            </p>
+                            <button class="btn-add-to-cart">Ajouter au panier</button>
+                        </div>
+
+                        <div class="menu-item" data-name="Kebab mixte" data-price="6.00" data-category="kebab">
+                            <div class="item-header">
+                                <h4 class="item-name">Kebab mixte</h4>
+                                <span class="item-price">10.00 CHF</span>
+                            </div>
+                            <p class="item-description">
+                                Viande de poulet et d'agneau, salade, tomates, oignons, sauce blanche
+                            </p>
+                            <button class="btn-add-to-cart">Ajouter au panier</button>
+                        </div>
+
+                                                <div class="menu-item" data-name="Kebab mixte" data-price="6.00" data-category="kebab">
+                            <div class="item-header">
+                                <h4 class="item-name">Kebab végétarien</h4>
+                                <span class="item-price">10.00 CHF</span>
+                            </div>
+                            <p class="item-description">
+                                Fallafels, salade, tomates, oignons, sauce blanche
                             </p>
                             <button class="btn-add-to-cart">Ajouter au panier</button>
                         </div>
@@ -161,21 +166,10 @@
                 <article class="menu-category">
                     <h3 class="category-title">🥪 Sandwiches & Wraps</h3>
                     <div class="menu-grid">
-                        <div class="menu-item" data-name="Wrap Poulet" data-price="5.50" data-category="sandwich">
-                            <div class="item-header">
-                                <h4 class="item-name">Wrap Poulet</h4>
-                                <span class="item-price">5.50€</span>
-                            </div>
-                            <p class="item-description">
-                                Poulet grillé, crudités, sauce curry
-                            </p>
-                            <button class="btn-add-to-cart">Ajouter au panier</button>
-                        </div>
-
                         <div class="menu-item" data-name="Tacos 3 Viandes" data-price="7.00" data-category="sandwich">
                             <div class="item-header">
                                 <h4 class="item-name">Tacos 3 Viandes</h4>
-                                <span class="item-price">7.00€</span>
+                                <span class="item-price">11.00 CHF</span>
                             </div>
                             <p class="item-description">
                                 Choix de 3 viandes, frites, fromage, sauce au choix
@@ -183,27 +177,28 @@
                             <button class="btn-add-to-cart">Ajouter au panier</button>
                         </div>
 
-                        <div class="menu-item" data-name="Panini Merguez" data-price="5.00" data-category="sandwich">
+                                        <div class="menu-item" data-name="Wrap Poulet" data-price="5.50" data-category="sandwich">
                             <div class="item-header">
-                                <h4 class="item-name">Panini Merguez</h4>
-                                <span class="item-price">5.00€</span>
+                                <h4 class="item-name">Wrap Poulet</h4>
+                                <span class="item-price">10.00 CHF</span>
                             </div>
                             <p class="item-description">
-                                Merguez grillées, fromage, harissa
+                                Poulet grillé, crudités, sauce curry
                             </p>
                             <button class="btn-add-to-cart">Ajouter au panier</button>
                         </div>
 
-                        <div class="menu-item" data-name="Assiette Kebab" data-price="8.50" data-category="sandwich">
+                        <div class="menu-item" data-name="Panini chorizo" data-price="5.00" data-category="sandwich">
                             <div class="item-header">
-                                <h4 class="item-name">Assiette Kebab</h4>
-                                <span class="item-price">8.50€</span>
+                                <h4 class="item-name">Panini chorizo</h4>
+                                <span class="item-price">5.00 CHF</span>
                             </div>
                             <p class="item-description">
-                                Viande kebab sur riz ou frites, salade, sauce
+                                Chorizo grillé, fromage, harissa
                             </p>
                             <button class="btn-add-to-cart">Ajouter au panier</button>
                         </div>
+
                     </div>
                 </article>
 
@@ -214,15 +209,7 @@
                         <div class="menu-item menu-item-small" data-name="Frites" data-price="3.00" data-category="accompagnement">
                             <div class="item-header">
                                 <h4 class="item-name">Frites</h4>
-                                <span class="item-price">3.00€</span>
-                            </div>
-                            <button class="btn-add-to-cart btn-small">Ajouter</button>
-                        </div>
-
-                        <div class="menu-item menu-item-small" data-name="Potatoes" data-price="3.50" data-category="accompagnement">
-                            <div class="item-header">
-                                <h4 class="item-name">Potatoes</h4>
-                                <span class="item-price">3.50€</span>
+                                <span class="item-price">5.00 CHF</span>
                             </div>
                             <button class="btn-add-to-cart btn-small">Ajouter</button>
                         </div>
@@ -230,7 +217,7 @@
                         <div class="menu-item menu-item-small" data-name="Nuggets (6 pcs)" data-price="4.00" data-category="accompagnement">
                             <div class="item-header">
                                 <h4 class="item-name">Nuggets (6 pcs)</h4>
-                                <span class="item-price">4.00€</span>
+                                <span class="item-price">6.00 CHF</span>
                             </div>
                             <button class="btn-add-to-cart btn-small">Ajouter</button>
                         </div>
@@ -238,7 +225,7 @@
                         <div class="menu-item menu-item-small" data-name="Salade" data-price="2.50" data-category="accompagnement">
                             <div class="item-header">
                                 <h4 class="item-name">Salade</h4>
-                                <span class="item-price">2.50€</span>
+                                <span class="item-price">7.50 CHF</span>
                             </div>
                             <button class="btn-add-to-cart btn-small">Ajouter</button>
                         </div>
@@ -252,7 +239,7 @@
                         <div class="menu-item menu-item-small" data-name="Soda 33cl" data-price="2.00" data-category="boisson">
                             <div class="item-header">
                                 <h4 class="item-name">Soda 33cl</h4>
-                                <span class="item-price">2.00€</span>
+                                <span class="item-price">3.50 CHF</span>
                             </div>
                             <button class="btn-add-to-cart btn-small">Ajouter</button>
                         </div>
@@ -260,15 +247,15 @@
                         <div class="menu-item menu-item-small" data-name="Soda 50cl" data-price="2.50" data-category="boisson">
                             <div class="item-header">
                                 <h4 class="item-name">Soda 50cl</h4>
-                                <span class="item-price">2.50€</span>
+                                <span class="item-price">4.50 CHF</span>
                             </div>
                             <button class="btn-add-to-cart btn-small">Ajouter</button>
                         </div>
 
                         <div class="menu-item menu-item-small" data-name="Jus de fruits" data-price="2.50" data-category="boisson">
                             <div class="item-header">
-                                <h4 class="item-name">Jus de fruits</h4>
-                                <span class="item-price">2.50€</span>
+                                <h4 class="item-name">Yogourt Ayran</h4>
+                                <span class="item-price">2.50 CHF</span>
                             </div>
                             <button class="btn-add-to-cart btn-small">Ajouter</button>
                         </div>
@@ -276,7 +263,7 @@
                         <div class="menu-item menu-item-small" data-name="Eau minérale" data-price="1.50" data-category="boisson">
                             <div class="item-header">
                                 <h4 class="item-name">Eau minérale</h4>
-                                <span class="item-price">1.50€</span>
+                                <span class="item-price">2.00 CHF</span>
                             </div>
                             <button class="btn-add-to-cart btn-small">Ajouter</button>
                         </div>
@@ -290,7 +277,7 @@
                         <div class="menu-item menu-item-small" data-name="Baklava" data-price="2.50" data-category="dessert">
                             <div class="item-header">
                                 <h4 class="item-name">Baklava</h4>
-                                <span class="item-price">2.50€</span>
+                                <span class="item-price">2.50 CHF</span>
                             </div>
                             <button class="btn-add-to-cart btn-small">Ajouter</button>
                         </div>
@@ -298,7 +285,7 @@
                         <div class="menu-item menu-item-small" data-name="Tiramisu" data-price="3.00" data-category="dessert">
                             <div class="item-header">
                                 <h4 class="item-name">Tiramisu</h4>
-                                <span class="item-price">3.00€</span>
+                                <span class="item-price">5.00 CHF</span>
                             </div>
                             <button class="btn-add-to-cart btn-small">Ajouter</button>
                         </div>
@@ -306,20 +293,64 @@
                         <div class="menu-item menu-item-small" data-name="Brownie" data-price="2.50" data-category="dessert">
                             <div class="item-header">
                                 <h4 class="item-name">Brownie</h4>
-                                <span class="item-price">2.50€</span>
+                                <span class="item-price">2.50 CHF</span>
                             </div>
                             <button class="btn-add-to-cart btn-small">Ajouter</button>
                         </div>
 
-                        <div class="menu-item menu-item-small" data-name="Glace (2 boules)" data-price="3.50" data-category="dessert">
-                            <div class="item-header">
-                                <h4 class="item-name">Glace (2 boules)</h4>
-                                <span class="item-price">3.50€</span>
-                            </div>
-                            <button class="btn-add-to-cart btn-small">Ajouter</button>
-                        </div>
                     </div>
                 </article>
+            </div>
+        </section>
+
+        <!-- SECTION PANIER : Panier d'achat -->
+        <section class="cart-section" id="cart">
+            <div class="container">
+                <div class="cart-wrapper">
+                    <div class="cart-header">
+                        <h3 class="cart-title">🛒 Mon Panier</h3>
+                        <button class="cart-toggle" id="cartToggle">
+                            <span class="cart-count" id="cartCount">0</span>
+                        </button>
+                    </div>
+                    
+                    <div class="cart-content" id="cartContent">
+                        <div class="cart-items" id="cartItems">
+                            <p class="cart-empty" id="cartEmpty">Votre panier est vide</p>
+                        </div>
+                        
+                        <div class="cart-summary" id="cartSummary" style="display: none;">
+                            <div class="checkout-details">
+                                <div class="checkout-field">
+                                    <label for="checkoutLastName">Nom <span class="required">*</span></label>
+                                    <input type="text" id="checkoutLastName" class="checkout-input" placeholder="Votre nom">
+                                </div>
+                                <div class="checkout-field">
+                                    <label for="checkoutFirstName">Prénom <span class="required">*</span></label>
+                                    <input type="text" id="checkoutFirstName" class="checkout-input" placeholder="Votre prénom">
+                                </div>
+                                <div class="checkout-field">
+                                    <label for="checkoutAddress">Adresse <span class="required">*</span></label>
+                                    <input type="text" id="checkoutAddress" class="checkout-input" placeholder="Rue et numéro">
+                                </div>
+                                <div class="checkout-field">
+                                    <label for="checkoutCity">Ville <span class="required">*</span></label>
+                                    <input type="text" id="checkoutCity" class="checkout-input" placeholder="Votre ville">
+                                </div>
+                                <div class="checkout-field">
+                                    <label for="checkoutPhone">Téléphone <span class="required">*</span></label>
+                                    <input type="tel" id="checkoutPhone" class="checkout-input" placeholder="079 123 45 67">
+                                </div>
+                            </div>
+                            <div class="cart-total">
+                                <strong>Total: <span id="cartTotal">0.00 CHF</span></strong>
+                            </div>
+                            <button class="btn btn-primary btn-block" id="checkoutBtn">
+                                Commander Maintenant
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -344,7 +375,7 @@
                             <span class="info-icon">📍</span>
                             <div class="info-content">
                                 <h4>Adresse</h4>
-                                <p>15 Avenue du Campus<br>69000 Lyon, France</p>
+                                <p>15 Avenue du Campus<br>1004 Lausanne, Suisse</p>
                             </div>
                         </div>
 
@@ -352,7 +383,7 @@
                             <span class="info-icon">📞</span>
                             <div class="info-content">
                                 <h4>Téléphone</h4>
-                                <p><a href="tel:+33472123456">04 72 12 34 56</a></p>
+                                <p><a href="tel:+41791234567">+41 79 123 45 67</a></p>
                             </div>
                         </div>
 
@@ -360,7 +391,7 @@
                             <span class="info-icon">✉️</span>
                             <div class="info-content">
                                 <h4>Email</h4>
-                                <p><a href="mailto:contact@kebabducampus.fr">contact@kebabducampus.fr</a></p>
+                                <p><a href="mailto:contact@kebabducoin.ch">contact@kebabducoin.ch</a></p>
                             </div>
                         </div>
 
@@ -398,8 +429,6 @@
                                     required
                                     aria-required="true"
                                 >
-                                <!-- Conteneur pour les messages d'erreur (rempli dynamiquement par JS) -->
-                                <span class="form-error" id="nameError"></span>
                             </div>
 
                             <div class="form-group">
@@ -415,7 +444,6 @@
                                     required
                                     aria-required="true"
                                 >
-                                <span class="form-error" id="emailError"></span>
                             </div>
 
                             <div class="form-group">
@@ -427,11 +455,10 @@
                                     id="phone" 
                                     name="phone" 
                                     class="form-input" 
-                                    placeholder="06 12 34 56 78"
+                                    placeholder="079 123 45 67"
                                     required
                                     aria-required="true"
                                 >
-                                <span class="form-error" id="phoneError"></span>
                             </div>
 
                             <div class="form-group">
@@ -453,7 +480,6 @@
                                     <option value="reclamation">Réclamation</option>
                                     <option value="autre">Autre</option>
                                 </select>
-                                <span class="form-error" id="subjectError"></span>
                             </div>
 
                             <div class="form-group">
@@ -470,7 +496,6 @@
                                     required
                                     aria-required="true"
                                 ></textarea>
-                                <span class="form-error" id="messageError"></span>
                             </div>
 
                             <!-- Message de succès (caché par défaut, affiché par JS après soumission) -->
@@ -495,9 +520,9 @@
             <div class="footer-content">
                 <!-- Informations du restaurant -->
                 <div class="footer-section">
-                    <h4 class="footer-title">Le Kebab du Campus</h4>
+                    <h4 class="footer-title">Le Kebab du Coin</h4>
                     <p class="footer-text">
-                        Votre restaurant kebab de confiance près du campus. 
+                        Votre restaurant kebab de confiance près de chez vous. 
                         Des produits frais et de qualité depuis 2015.
                     </p>
                 </div>
@@ -534,8 +559,8 @@
 
             <!-- Copyright -->
             <div class="footer-bottom">
-                <p>&copy; 2024 Le Kebab du Campus. Tous droits réservés.</p>
-                <p class="footer-note">Site créé à des fins pédagogiques pour les étudiants en informatique de gestion</p>
+                <p>&copy; 2024 Le Kebab du Coin. Tous droits réservés.</p>
+                <p class="footer-note">Site créé à des fins de démonstration par Site-simple.ch</p>
             </div>
         </div>
     </footer>
