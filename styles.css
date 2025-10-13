@@ -54,6 +54,8 @@
  * Avantages : maintenance facilitée, cohérence visuelle, thèmes dynamiques possibles
  */
 :root {
+    color-scheme: light;
+    color-scheme: light;
     /* PALETTE DE COULEURS - Thème chaud et accueillant */
     --color-primary: #E67E22;      /* Orange (kebab, chaleur) */
     --color-primary-dark: #D35400;  /* Orange foncé (hover, accents) */
