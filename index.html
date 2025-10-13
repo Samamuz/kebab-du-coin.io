@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Le Kebab du Campus - Restaurant kebab pour étudiants. Découvrez nos délicieux kebabs, sandwiches et menus à prix étudiants.">
     <meta name="keywords" content="kebab, restaurant, étudiant, campus, sandwich, menu">
+    <meta name="color-scheme" content="light">
     <title>Kebab du Coin - Restaurant</title>
     
     <!-- Google Fonts - Funnel Sans -->
@@ -15,6 +16,7 @@
     
     <!-- Lien vers la feuille de style externe -->
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
         .navbar {
             /* garantit l’alignement vertical du logo avec le menu */
@@ -37,6 +39,13 @@
 
         .contact-form .form-group {
             margin-bottom: 0.75rem;
+        }
+
+        @media (min-width: 992px) {
+            .nav-menu {
+                gap: 0.5rem;
+                margin-right: 1rem;
+            }
         }
     </style>
 </head>
@@ -61,6 +70,7 @@
                 <ul class="nav-menu" id="navMenu">
                     <li><a href="#accueil" class="nav-link">Accueil</a></li>
                     <li><a href="#menu" class="nav-link">Menu</a></li>
+                    <li><a href="#cart" class="nav-link">Panier</a></li>
                     <li><a href="#contact" class="nav-link">Contact</a></li>
                 </ul>
             </nav>
@@ -379,7 +389,7 @@
                         <h3 class="contact-info-title">Nos Informations</h3>
                         
                         <!-- Utilisation de listes pour structurer les informations -->
-                        <div class="contact-logo" style="text-align: right; margin-bottom: 3rem; margin-top: 2rem;">
+                        <div class="contact-logo" style="text-align: right; margin-bottom: 1rem; margin-top: 1rem;">
                             <img src="images/logo.png" alt="Logo du Kebab du Coin" width="90%">
                         </div>
                         <div class="info-item">
@@ -485,10 +495,8 @@
                                     aria-required="true"
                                 >
                                     <option value="">Sélectionnez un sujet</option>
-                                    <option value="reservation">Réservation</option>
-                                    <option value="info">Demande d'information</option>
+                                    <option value="info">Demande d'informations</option>
                                     <option value="suggestion">Suggestion</option>
-                                    <option value="reclamation">Réclamation</option>
                                     <option value="autre">Autre</option>
                                 </select>
                             </div>
@@ -562,18 +570,13 @@
                     <h4 class="footer-title">Suivez-nous</h4>
                     <div class="social-links">
                         <a href="#" class="social-link" aria-label="Facebook">
-                            <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M22.675 0H1.325A1.325 1.325 0 0 0 0 1.325v21.35A1.325 1.325 0 0 0 1.325 24h11.495v-9.294H9.692V11.01h3.128V8.305c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.316h3.587l-.467 3.696h-3.12V24h6.116A1.325 1.325 0 0 0 24 22.675V1.325A1.325 1.325 0 0 0 22.675 0Z" />
-                            </svg>
+                            <i class="fa fa-facebook-official" aria-hidden="true"></i>
                         </a>
                         <a href="#" class="social-link" aria-label="Instagram">
-                            <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3.5A5.5 5.5 0 1 1 12 19a5.5 5.5 0 0 1 0-11Zm0 2A3.5 3.5 0 1 0 12 17a3.5 3.5 0 0 0 0-7Zm5.75-2.75a1.25 1.25 0 1 1-1.25 1.25 1.25 1.25 0 0 1 1.25-1.25Z"/>
-                            </svg>
+                            <i class="fa fa-instagram" aria-hidden="true"></i>
                         </a>
                         <a href="#" class="social-link" aria-label="Twitter">
-                            <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.009-14.009 14.009A13.94 13.94 0 0 1 0 19.539c.308.036.6.051.923.051a9.865 9.865 0 0 0 6.115-2.105 4.935 4.935 0 0 1-4.604-3.419c.3.046.6.076.908.076.436 0 .872-.061 1.28-.166a4.928 4.928 0 0 1-3.949-4.833v-.063a4.97 4.97 0 0 0 2.23.616 4.926 4.926 0 0 1-2.195-4.104c0-.908.24-1.752.66-2.481a14.004 14.004 0 0 0 10.165 5.159 5.558 5.558 0 0 1-.121-1.128 4.925 4.925 0 0 1 4.925-4.925 4.9 4.9 0 0 1 3.59 1.554 9.74 9.74 0 0 0 3.124-1.192 4.92 4.92 0 0 1-2.164 2.713 9.86 9.86 0 0 0 2.834-.754 10.59 10.59 0 0 1-2.462 2.549Z" />
+                            <i class="fa fa-twitter" aria-hidden="true"></i>
                         </a>
                     </div>
                 </div>
