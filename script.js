@@ -37,6 +37,7 @@ const navMenu = document.getElementById('navMenu');
 const navLinks = document.querySelectorAll('.nav-link');
 const contactForm = document.getElementById('contactForm');
 const header = document.getElementById('header');
+const heroSection = document.getElementById('accueil');
 
 // Shopping cart elements
 const cartToggle = document.getElementById('cartToggle');
@@ -115,6 +116,31 @@ function closeMobileMenu() {
     navMenu.classList.remove('active');
     navToggle.classList.remove('active');
     document.body.style.overflow = '';
+}
+
+/**
+ * Mettre à jour la hauteur de l'en-tête dans le CSS
+ * Expose la hauteur de l'en-tête pour d'autres utilisations CSS (comme des décalages)
+ */
+function updateHeaderHeight() {
+    if (!header) return;
+    document.documentElement.style.setProperty('--header-height', `${header.offsetHeight}px`);
+}
+
+/**
+ * Fonction d'initialisation de l'observateur de contraste pour l'en-tête
+ * Change l'apparence de l'en-tête quand on scroll past le hero
+ */
+function initHeaderContrastObserver() {
+    if (!header || !heroSection) return;
+    const contrastObserver = new IntersectionObserver(([entry]) => {
+        header.classList.toggle('header--contrast', !entry.isIntersecting);
+    }, {
+        root: null,
+        rootMargin: '-80px 0px 0px 0px',
+        threshold: 0
+    });
+    contrastObserver.observe(heroSection);
 }
 
 /**
@@ -217,6 +243,8 @@ window.addEventListener('scroll', () => {
         lastScrollTop = scrollTop;
     }, 100); // Exécuter maximum une fois toutes les 100ms
 });
+
+window.addEventListener('resize', updateHeaderHeight);
 
 /* ========================================
    4. VALIDATION DU FORMULAIRE
@@ -705,13 +733,17 @@ class ShoppingCart {
         itemDiv.innerHTML = `
             <div class="cart-item-info">
                 <div class="cart-item-name">${item.name}</div>
-                <div class="cart-item-price">${item.price.toFixed(2)} CHF chacun</div>
             </div>
-            <div class="quantity-controls">
-                <button class="quantity-btn" data-action="decrease" data-item-id="${item.id}">-</button>
-                <span class="quantity-display">${item.quantity}</span>
-                <button class="quantity-btn" data-action="increase" data-item-id="${item.id}">+</button>
-                <button class="remove-item" data-item-id="${item.id}">Supprimer</button>
+            <div class="cart-item-controls">
+                <div class="quantity-controls">
+                    <button class="quantity-btn" data-action="decrease" data-item-id="${item.id}">-</button>
+                    <span class="quantity-display">${item.quantity}</span>
+                    <button class="quantity-btn" data-action="increase" data-item-id="${item.id}">+</button>
+                </div>
+                <div class="cart-item-meta">
+                    <div class="cart-item-price">${item.price.toFixed(2)} CHF chacun</div>
+                    <button class="remove-item" data-item-id="${item.id}">Supprimer</button>
+                </div>
             </div>
         `;
         
@@ -923,6 +955,8 @@ function init() {
     
     // Initialiser l'observer pour la navigation active
     initScrollObserver();
+    updateHeaderHeight();
+    initHeaderContrastObserver();
     
     // Initialiser la validation du formulaire
     if (contactForm) {
