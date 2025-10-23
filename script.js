@@ -730,9 +730,11 @@ class ShoppingCart {
     createCartItemElement(item) {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'cart-item';
+        const itemTotal = (item.price * item.quantity).toFixed(2);
         itemDiv.innerHTML = `
             <div class="cart-item-info">
                 <div class="cart-item-name">${item.name}</div>
+                <div class="cart-item-price">${item.price.toFixed(2)} CHF chacun</div>
             </div>
             <div class="cart-item-controls">
                 <div class="quantity-controls">
@@ -740,10 +742,8 @@ class ShoppingCart {
                     <span class="quantity-display">${item.quantity}</span>
                     <button class="quantity-btn" data-action="increase" data-item-id="${item.id}">+</button>
                 </div>
-                <div class="cart-item-meta">
-                    <div class="cart-item-price">${item.price.toFixed(2)} CHF chacun</div>
-                    <button class="remove-item" data-item-id="${item.id}">Supprimer</button>
-                </div>
+                <div class="cart-item-total">${itemTotal} CHF</div>
+                <button class="remove-item" data-item-id="${item.id}">&times;</button>
             </div>
         `;
         
