@@ -9,6 +9,9 @@
     <meta name="color-scheme" content="light">
     <title>Kebab du Coin - Restaurant</title>
     
+    <!-- Favicon pour l'onglet du navigateur -->
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon.png">
+
     <!-- Google Fonts - Funnel Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -86,7 +89,7 @@
             <div class="hero-overlay"></div>
             <div class="container hero-content">
                 <h1 class="hero-title">Bienvenue au Kebab du Coin</h1>
-                <p class="hero-subtitle">Des saveurs authentiques à prix étudiants</p>
+                <p class="hero-subtitle">Des saveurs authentiques</p>
                 <p class="hero-description">
                     Produits frais, préparation rapide et des prix adaptés à tous les budgets.
                 </p>
@@ -113,59 +116,114 @@
                     <!-- Grille de produits utilisant CSS Grid/Flexbox -->
                     <div class="menu-grid">
                         <!-- Chaque produit est une carte (card) -->
-                        <div class="menu-item menu-item-highlight" data-name="Kebab Menu Étudiant" data-price="9.00" data-category="kebab">
+                        <div class="menu-item menu-item-highlight" data-name="Kebab Menu Étudiant" data-price="9.00" data-category="kebab" data-has-options="true">
                             <span class="badge">Populaire</span>
                             <div class="item-header">
                                 <h4 class="item-name">Kebab Menu</h4>
                                 <span class="item-price">14.00 CHF</span>
                             </div>
                             <p class="item-description">
-                                Kebab à choix + soda 33cl
+                                Kebab à choix + canette 33cl
                             </p>
+                            <div class="menu-item-options" aria-hidden="true">
+                                <div class="menu-option" data-option-key="meat" data-option-label="Viande" data-selection-type="single" data-max="1" data-required="true" data-error-message="Merci de sélectionner une viande.">
+                                    <p class="menu-option-label">Choisissez votre viande</p>
+                                    <div class="menu-option-buttons" role="group" aria-label="Choisissez votre viande">
+                                        <button type="button" class="menu-option-button" data-value="Poulet">Poulet</button>
+                                        <button type="button" class="menu-option-button" data-value="Agneau">Agneau</button>
+                                        <button type="button" class="menu-option-button" data-value="Mixte (poulet + agneau)">Mixte (poulet + agneau)</button>
+                                        <button type="button" class="menu-option-button" data-value="Végétarien (falafels)">Végétarien (falafels)</button>
+                                    </div>
+                                    <p class="menu-option-feedback" aria-live="polite"></p>
+                                </div>
+                                <div class="menu-option" data-option-key="sauce" data-option-label="Sauce" data-selection-type="multiple" data-max="2" data-required="true" data-error-message="Merci de sélectionner au moins une sauce." data-limit-message="Vous pouvez choisir jusqu'à deux sauces.">
+                                    <p class="menu-option-label">Choisissez jusqu'à deux sauces</p>
+                                    <div class="menu-option-buttons" role="group" aria-label="Choisissez jusqu'à deux sauces">
+                                        <button type="button" class="menu-option-button" data-value="Blanche">Blanche</button>
+                                        <button type="button" class="menu-option-button" data-value="Andalouse">Andalouse</button>
+                                        <button type="button" class="menu-option-button" data-value="Samouraï">Samouraï</button>
+                                        <button type="button" class="menu-option-button" data-value="Barbecue">Barbecue</button>
+                                        <button type="button" class="menu-option-button" data-value="Harissa">Harissa</button>
+                                    </div>
+                                    <p class="menu-option-feedback" aria-live="polite"></p>
+                                </div>
+                                <div class="menu-option" data-option-key="vegetables" data-option-label="Légumes" data-selection-type="multiple" data-required="false">
+                                    <p class="menu-option-label">Ajoutez vos légumes</p>
+                                    <div class="menu-option-buttons" role="group" aria-label="Ajoutez vos légumes">
+                                        <button type="button" class="menu-option-button" data-value="Tout">Tout les légumes</button>
+                                        <button type="button" class="menu-option-button" data-value="Salade">Salade</button>
+                                        <button type="button" class="menu-option-button" data-value="Tomates">Tomates</button>
+                                        <button type="button" class="menu-option-button" data-value="Oignons">Oignons</button>
+                                        <button type="button" class="menu-option-button" data-value="Chou rouge">Chou rouge</button>
+                                        <button type="button" class="menu-option-button" data-value="Concombre">Concombre</button>
+                                    </div>
+                                    <p class="menu-option-feedback" aria-live="polite"></p>
+                                </div>
+                                <div class="menu-option" data-option-key="boisson" data-option-label="Boisson 33cl" data-selection-type="single" data-max="1" data-required="true" data-error-message="Merci de sélectionner votre boisson.">
+                                    <p class="menu-option-label">Choisissez votre canette 33cl</p>
+                                    <div class="menu-option-buttons" role="group" aria-label="Choisissez votre canette 33cl">
+                                        <button type="button" class="menu-option-button" data-value="Coca">Coca</button>
+                                        <button type="button" class="menu-option-button" data-value="Sprite">Sprite</button>
+                                        <button type="button" class="menu-option-button" data-value="Fanta">Fanta</button>
+                                        <button type="button" class="menu-option-button" data-value="Ice-Tea Citron">Ice-Tea Citron</button>
+                                        <button type="button" class="menu-option-button" data-value="Ice-Tea Pêche">Ice-Tea Pêche</button>
+                                        <button type="button" class="menu-option-button" data-value="Oasis Tropical">Oasis Tropical</button>
+                                        <button type="button" class="menu-option-button" data-value="Oasis Fraise-Framboise">Oasis Fraise-Framboise</button>
+                                    </div>
+                                    <p class="menu-option-feedback" aria-live="polite"></p>
+                                </div>
+                                <p class="menu-item-options-hint" role="status" data-default-hint="Sélectionnez une viande, au moins une sauce, votre boisson et ajoutez vos légumes préférés." data-error-hint="Merci de choisir une viande, une sauce et une boisson avant d'ajouter au panier.">
+                                    Sélectionnez une viande, au moins une sauce, votre boisson et ajoutez vos légumes préférés.
+                                </p>
+                            </div>
                             <button class="btn-add-to-cart">Ajouter au panier</button>
                         </div>
                     
-                        <div class="menu-item" data-name="Kebab Agneau" data-price="6.50" data-category="kebab">
+                        <div class="menu-item" data-name="Kebab" data-price="8.50" data-category="kebab" data-has-options="true">
                             <div class="item-header">
-                                <h4 class="item-name">Kebab Agneau</h4>
-                                <span class="item-price">11.00 CHF</span>
+                                <h4 class="item-name">Kebab</h4>
+                                <span class="item-price">12.00 CHF</span>
                             </div>
                             <p class="item-description">
-                                Viande d'agneau, salade, tomates, oignons, sauce blanche
+                                Personnalisez votre kebab avec votre viande, vos sauces et vos légumes préférés.
                             </p>
-                            <button class="btn-add-to-cart">Ajouter au panier</button>
-                        </div>
-
-                        <div class="menu-item" data-name="Kebab Poulet" data-price="7.50" data-category="kebab">
-                            <div class="item-header">
-                                <h4 class="item-name">Kebab Poulet</h4>
-                                <span class="item-price">11.00 CHF</span>
+                            <div class="menu-item-options" aria-hidden="true">
+                                <div class="menu-option" data-option-key="meat" data-option-label="Viande" data-selection-type="single" data-max="1" data-required="true" data-error-message="Merci de sélectionner une viande.">
+                                    <p class="menu-option-label">Choisissez votre viande</p>
+                                    <div class="menu-option-buttons" role="group" aria-label="Choisissez votre viande">
+                                        <button type="button" class="menu-option-button" data-value="Poulet">Poulet</button>
+                                        <button type="button" class="menu-option-button" data-value="Agneau">Agneau</button>
+                                        <button type="button" class="menu-option-button" data-value="Mixte (poulet + agneau)">Mixte (poulet + agneau)</button>
+                                        <button type="button" class="menu-option-button" data-value="Végétarien (falafels)">Végétarien (falafels)</button>
+                                    </div>
+                                    <p class="menu-option-feedback" aria-live="polite"></p>
+                                </div>
+                                <div class="menu-option" data-option-key="sauce" data-option-label="Sauce" data-selection-type="multiple" data-max="2" data-required="true" data-error-message="Merci de sélectionner au moins une sauce." data-limit-message="Vous pouvez choisir jusqu'à deux sauces.">
+                                    <p class="menu-option-label">Choisissez jusqu'à deux sauces</p>
+                                    <div class="menu-option-buttons" role="group" aria-label="Choisissez jusqu'à deux sauces">
+                                        <button type="button" class="menu-option-button" data-value="Blanche">Blanche</button>
+                                        <button type="button" class="menu-option-button" data-value="Andalouse">Andalouse</button>
+                                        <button type="button" class="menu-option-button" data-value="Samouraï">Samouraï</button>
+                                        <button type="button" class="menu-option-button" data-value="Barbecue">Barbecue</button>
+                                        <button type="button" class="menu-option-button" data-value="Harissa">Harissa</button>
+                                    </div>
+                                    <p class="menu-option-feedback" aria-live="polite"></p>
+                                </div>
+                                <div class="menu-option" data-option-key="vegetables" data-option-label="Légumes" data-selection-type="multiple" data-required="false">
+                                    <p class="menu-option-label">Ajoutez vos légumes</p>
+                                    <div class="menu-option-buttons" role="group" aria-label="Ajoutez vos légumes">
+                                        <button type="button" class="menu-option-button" data-value="Salade">Salade</button>
+                                        <button type="button" class="menu-option-button" data-value="Tomates">Tomates</button>
+                                        <button type="button" class="menu-option-button" data-value="Oignons">Oignons</button>
+                                        <button type="button" class="menu-option-button" data-value="Chou rouge">Chou rouge</button>
+                                        <button type="button" class="menu-option-button" data-value="Concombre">Concombre</button>
+                                    </div>
+                                    <p class="menu-option-feedback" aria-live="polite"></p>
+                                </div>
+                                <p class="menu-item-options-hint" role="status" data-default-hint="Sélectionnez une viande, au moins une sauce et ajoutez vos légumes préférés." data-error-hint="Merci de choisir une viande et au moins une sauce avant d'ajouter au panier.">
+                                    Sélectionnez une viande, au moins une sauce et ajoutez vos légumes préférés.
+                                </p>
                             </div>
-                            <p class="item-description">
-                                Viande de poulet, salade, tomates, oignons, sauce blanche
-                            </p>
-                            <button class="btn-add-to-cart">Ajouter au panier</button>
-                        </div>
-
-                        <div class="menu-item" data-name="Kebab mixte" data-price="6.00" data-category="kebab">
-                            <div class="item-header">
-                                <h4 class="item-name">Kebab mixte</h4>
-                                <span class="item-price">10.00 CHF</span>
-                            </div>
-                            <p class="item-description">
-                                Viande de poulet et d'agneau, salade, tomates, oignons, sauce blanche
-                            </p>
-                            <button class="btn-add-to-cart">Ajouter au panier</button>
-                        </div>
-
-                                                <div class="menu-item" data-name="Kebab mixte" data-price="6.00" data-category="kebab">
-                            <div class="item-header">
-                                <h4 class="item-name">Kebab végétarien</h4>
-                                <span class="item-price">10.00 CHF</span>
-                            </div>
-                            <p class="item-description">
-                                Fallafels, salade, tomates, oignons, sauce blanche
-                            </p>
                             <button class="btn-add-to-cart">Ajouter au panier</button>
                         </div>
                     </div>
@@ -245,18 +303,60 @@
                 <article class="menu-category">
                     <h3 class="category-title">🥤 Boissons</h3>
                     <div class="menu-grid menu-grid-4">
-                        <div class="menu-item menu-item-small" data-name="Soda 33cl" data-price="2.00" data-category="boisson">
+                        <div class="menu-item menu-item-small" data-name="Canette 33cl" data-price="2.00" data-category="boisson" data-has-options="true">
                             <div class="item-header">
-                                <h4 class="item-name">Soda 33cl</h4>
+                                <h4 class="item-name">Canette 33cl</h4>
                                 <span class="item-price">3.50 CHF</span>
+                            </div>
+                            <p class="item-description">
+                                Choisissez votre boisson préférée (33cl).
+                            </p>
+                            <div class="menu-item-options" aria-hidden="true">
+                                <div class="menu-option" data-option-key="boisson" data-option-label="Boisson" data-selection-type="single" data-max="1" data-required="true" data-error-message="Merci de sélectionner une boisson.">
+                                    <p class="menu-option-label">Choisissez votre boisson</p>
+                                    <div class="menu-option-buttons" role="group" aria-label="Choisissez votre boisson">
+                                        <button type="button" class="menu-option-button" data-value="Coca">Coca</button>
+                                        <button type="button" class="menu-option-button" data-value="Sprite">Sprite</button>
+                                        <button type="button" class="menu-option-button" data-value="Fanta">Fanta</button>
+                                        <button type="button" class="menu-option-button" data-value="Ice-Tea Citron">Ice-Tea Citron</button>
+                                        <button type="button" class="menu-option-button" data-value="Ice-Tea Pêche">Ice-Tea Pêche</button>
+                                        <button type="button" class="menu-option-button" data-value="Oasis Tropical">Oasis Tropical</button>
+                                        <button type="button" class="menu-option-button" data-value="Oasis Fraise-Framboise">Oasis Fraise-Framboise</button>
+                                    </div>
+                                    <p class="menu-option-feedback" aria-live="polite"></p>
+                                </div>
+                                <p class="menu-item-options-hint" role="status" data-default-hint="Sélectionnez votre boisson préférée." data-error-hint="Merci de choisir une boisson avant d'ajouter au panier.">
+                                    Sélectionnez votre boisson préférée.
+                                </p>
                             </div>
                             <button class="btn-add-to-cart btn-small">Ajouter</button>
                         </div>
 
-                        <div class="menu-item menu-item-small" data-name="Soda 50cl" data-price="2.50" data-category="boisson">
+                        <div class="menu-item menu-item-small" data-name="Soda 50cl" data-price="2.50" data-category="boisson" data-has-options="true">
                             <div class="item-header">
                                 <h4 class="item-name">Soda 50cl</h4>
                                 <span class="item-price">4.50 CHF</span>
+                            </div>
+                            <p class="item-description">
+                                Choisissez votre boisson préférée (50cl).
+                            </p>
+                            <div class="menu-item-options" aria-hidden="true">
+                                <div class="menu-option" data-option-key="boisson" data-option-label="Boisson" data-selection-type="single" data-max="1" data-required="true" data-error-message="Merci de sélectionner une boisson.">
+                                    <p class="menu-option-label">Choisissez votre boisson</p>
+                                    <div class="menu-option-buttons" role="group" aria-label="Choisissez votre boisson">
+                                        <button type="button" class="menu-option-button" data-value="Coca">Coca</button>
+                                        <button type="button" class="menu-option-button" data-value="Sprite">Sprite</button>
+                                        <button type="button" class="menu-option-button" data-value="Fanta">Fanta</button>
+                                        <button type="button" class="menu-option-button" data-value="Ice-Tea Citron">Ice-Tea Citron</button>
+                                        <button type="button" class="menu-option-button" data-value="Ice-Tea Pêche">Ice-Tea Pêche</button>
+                                        <button type="button" class="menu-option-button" data-value="Oasis Tropical">Oasis Tropical</button>
+                                        <button type="button" class="menu-option-button" data-value="Oasis Fraise-Framboise">Oasis Fraise-Framboise</button>
+                                    </div>
+                                    <p class="menu-option-feedback" aria-live="polite"></p>
+                                </div>
+                                <p class="menu-item-options-hint" role="status" data-default-hint="Sélectionnez votre boisson préférée." data-error-hint="Merci de choisir une boisson avant d'ajouter au panier.">
+                                    Sélectionnez votre boisson.
+                                </p>
                             </div>
                             <button class="btn-add-to-cart btn-small">Ajouter</button>
                         </div>
