@@ -106,6 +106,10 @@ function toggleMobileMenu() {
     
     // Empêcher le scroll du body quand le menu est ouvert (meilleure UX mobile)
     document.body.style.overflow = navMenu.classList.contains('active') ? 'hidden' : '';
+
+    if (header) {
+        header.classList.toggle('header--menu-open', navMenu.classList.contains('active'));
+    }
 }
 
 /**
@@ -116,6 +120,10 @@ function closeMobileMenu() {
     navMenu.classList.remove('active');
     navToggle.classList.remove('active');
     document.body.style.overflow = '';
+
+    if (header) {
+        header.classList.remove('header--menu-open');
+    }
 }
 
 /**
@@ -219,29 +227,10 @@ function initScrollObserver() {
     sections.forEach(section => observer.observe(section));
 }
 
-/**
- * Masquer/afficher le header au scroll (optionnel)
- * Améliore l'espace d'affichage sur mobile
- */
-let lastScrollTop = 0;
-let scrollTimer;
-
+// Veille à garder le header visible en permanence malgré le scroll
 window.addEventListener('scroll', () => {
-    // Utilisation d'un timer pour limiter la fréquence d'exécution (debouncing)
-    clearTimeout(scrollTimer);
-    scrollTimer = setTimeout(() => {
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        
-        // Si on scroll vers le bas de plus de 100px, masquer le header
-        if (scrollTop > lastScrollTop && scrollTop > 100) {
-            header.style.transform = 'translateY(-100%)';
-        } else {
-            // Si on scroll vers le haut, afficher le header
-            header.style.transform = 'translateY(0)';
-        }
-        
-        lastScrollTop = scrollTop;
-    }, 100); // Exécuter maximum une fois toutes les 100ms
+    if (!header) return;
+    header.style.transform = 'translateY(0)';
 });
 
 window.addEventListener('resize', updateHeaderHeight);
@@ -553,30 +542,227 @@ class ShoppingCart {
                 e.preventDefault();
                 const menuItem = button.closest('.menu-item');
                 
-                if (menuItem) {
-                    const item = {
-                        id: this.generateItemId(menuItem),
-                        name: menuItem.dataset.name,
-                        price: parseFloat(menuItem.dataset.price),
-                        category: menuItem.dataset.category
-                    };
-                    
-                    this.addItem(item);
-                    this.showAddToCartFeedback(button);
+                if (!menuItem) {
+                    return;
+                }
+
+                const hasOptions = menuItem.dataset.hasOptions === 'true';
+                let optionData = { options: [], isComplete: true };
+
+                if (hasOptions) {
+                    optionData = this.collectMenuItemOptions(menuItem);
+
+                    if (!optionData.isComplete) {
+                        return;
+                    }
+                }
+
+                const item = {
+                    id: this.generateItemId(menuItem, optionData.options),
+                    name: menuItem.dataset.name,
+                    price: parseFloat(menuItem.dataset.price),
+                    category: menuItem.dataset.category
+                };
+
+                if (optionData.options && optionData.options.length) {
+                    item.options = optionData.options;
+                }
+                
+                this.addItem(item);
+                this.showAddToCartFeedback(button);
+
+                if (hasOptions) {
+                    this.resetMenuItemOptions(optionData);
                 }
             });
         });
     }
     
     /**
+     * Gérer la récupération et la validation des options d'un menu item
+     * @param {HTMLElement} menuItem - L'élément du menu concerné
+    * @returns {{options: Array, isComplete: boolean, wrapper: HTMLElement|null, selects: HTMLElement[], optionGroups: HTMLElement[], hint: HTMLElement|null}}
+     */
+    collectMenuItemOptions(menuItem) {
+        const optionsWrapper = menuItem.querySelector('.menu-item-options');
+        const result = {
+            options: [],
+            isComplete: true,
+            wrapper: optionsWrapper,
+            selects: [],
+            optionGroups: [],
+            hint: null
+        };
+
+        if (!optionsWrapper) {
+            return result;
+        }
+
+        optionsWrapper.classList.add('menu-item-options--visible');
+        optionsWrapper.setAttribute('aria-hidden', 'false');
+
+        const hint = optionsWrapper.querySelector('.menu-item-options-hint');
+        result.hint = hint;
+
+        let isComplete = true;
+        const missingLabels = [];
+
+        const optionGroups = Array.from(optionsWrapper.querySelectorAll('.menu-option'));
+        result.optionGroups = optionGroups;
+
+        if (optionGroups.length > 0) {
+            optionGroups.forEach(option => {
+                option.classList.remove('menu-option--error');
+
+                const selectionType = option.dataset.selectionType || 'single';
+                const max = parseInt(option.dataset.max, 10);
+                const maxSelections = Number.isFinite(max) && max > 0
+                    ? max
+                    : (selectionType === 'multiple' ? option.querySelectorAll('.menu-option-button').length : 1);
+                const required = option.dataset.required !== 'false';
+                const buttons = Array.from(option.querySelectorAll('.menu-option-button'));
+                const selectedButtons = buttons.filter(btn => btn.classList.contains('menu-option-button--selected'));
+
+                if (selectedButtons.length > maxSelections) {
+                    option.classList.add('menu-option--error');
+                    isComplete = false;
+                    return;
+                }
+
+                if (required && selectedButtons.length === 0) {
+                    option.classList.add('menu-option--error');
+                    missingLabels.push(option.dataset.optionLabel || option.dataset.optionKey || 'option');
+                    isComplete = false;
+                    return;
+                }
+
+                if (selectedButtons.length > 0) {
+                    const values = selectedButtons.map(btn => btn.dataset.value || btn.textContent.trim());
+                    const valueString = selectionType === 'multiple' ? values.join(', ') : values[0];
+                    result.options.push({
+                        key: option.dataset.optionKey || option.dataset.optionLabel || 'option',
+                        label: option.dataset.optionLabel || option.dataset.optionKey || 'Option',
+                        value: valueString
+                    });
+                }
+            });
+        } else {
+            const selects = Array.from(optionsWrapper.querySelectorAll('select[data-required="true"]'));
+            result.selects = selects;
+
+            selects.forEach(select => {
+                select.classList.remove('menu-option-select--error');
+                if (!select.value) {
+                    isComplete = false;
+                    select.classList.add('menu-option-select--error');
+                }
+            });
+
+            if (!isComplete) {
+                const firstEmpty = selects.find(select => !select.value);
+                if (firstEmpty) {
+                    firstEmpty.focus();
+                }
+            } else {
+                result.options = selects.map(select => {
+                    const optionLabel = select.dataset.optionLabel || select.getAttribute('aria-label') || select.previousElementSibling?.textContent?.trim() || '';
+                    const optionKey = select.dataset.optionKey || select.name || optionLabel.toLowerCase();
+                    const selectedOption = select.options[select.selectedIndex];
+                    const displayValue = selectedOption ? selectedOption.text.trim() : select.value;
+                    return {
+                        key: optionKey,
+                        label: optionLabel || optionKey,
+                        value: displayValue
+                    };
+                });
+            }
+        }
+
+        if (!isComplete) {
+            optionsWrapper.classList.add('menu-item-options--error');
+            if (hint) {
+                const defaultHint = hint.dataset.defaultHint || hint.textContent;
+                const errorHint = hint.dataset.errorHint || (missingLabels.length ? `Veuillez sélectionner : ${missingLabels.join(', ')}.` : defaultHint);
+                hint.textContent = errorHint;
+                hint.classList.add('menu-item-options-hint--error');
+            }
+
+            if (optionGroups.length > 0) {
+                const firstInvalidGroup = optionGroups.find(option => option.classList.contains('menu-option--error'));
+                const firstButton = firstInvalidGroup?.querySelector('.menu-option-button');
+                if (firstButton) {
+                    firstButton.focus();
+                }
+            }
+        } else {
+            optionsWrapper.classList.remove('menu-item-options--error');
+            if (hint) {
+                const defaultHint = hint.dataset.defaultHint || hint.textContent;
+                hint.textContent = defaultHint;
+                hint.classList.remove('menu-item-options-hint--error');
+            }
+        }
+
+        result.isComplete = isComplete;
+        return result;
+    }
+
+    /**
+     * Réinitialiser les options après ajout au panier
+     * @param {Object} optionData - Données des options collectées
+     */
+    resetMenuItemOptions(optionData) {
+        const { selects = [], optionGroups = [], wrapper, hint } = optionData;
+
+        selects.forEach(select => {
+            if (select.querySelector('option[value=""]')) {
+                select.value = '';
+            } else {
+                select.selectedIndex = 0;
+            }
+            select.classList.remove('menu-option-select--error');
+        });
+
+        optionGroups.forEach(option => {
+            option.classList.remove('menu-option--error');
+            option.querySelectorAll('.menu-option-button').forEach(button => {
+                button.classList.remove('menu-option-button--selected');
+                button.setAttribute('aria-pressed', 'false');
+            });
+        });
+
+        if (wrapper) {
+            wrapper.classList.remove('menu-item-options--error');
+            wrapper.classList.remove('menu-item-options--visible');
+            wrapper.setAttribute('aria-hidden', 'true');
+        }
+
+        if (hint) {
+            const defaultHint = hint.dataset.defaultHint || hint.textContent;
+            hint.textContent = defaultHint;
+            hint.classList.remove('menu-item-options-hint--error');
+        }
+    }
+
+    /**
      * Générer un ID unique pour un item
      * @param {HTMLElement} menuItem - L'élément menu
      * @returns {string} ID unique
      */
-    generateItemId(menuItem) {
+    generateItemId(menuItem, options = []) {
         const name = menuItem.dataset.name;
         const price = menuItem.dataset.price;
-        return `${name}-${price}`.toLowerCase().replace(/\s+/g, '-');
+        const baseId = `${name}-${price}`.toLowerCase().replace(/\s+/g, '-');
+
+        if (!options || !options.length) {
+            return baseId;
+        }
+
+        const optionId = options
+            .map(option => `${option.key}-${option.value}`.toLowerCase().replace(/\s+/g, '-'))
+            .join('-');
+
+        return `${baseId}-${optionId}`;
     }
     
     /**
@@ -731,9 +917,13 @@ class ShoppingCart {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'cart-item';
         const itemTotal = (item.price * item.quantity).toFixed(2);
+        const optionsHtml = item.options && item.options.length
+            ? `<ul class="cart-item-options">${item.options.map(option => `<li><span>${option.label} :</span> ${option.value}</li>`).join('')}</ul>`
+            : '';
         itemDiv.innerHTML = `
             <div class="cart-item-info">
                 <div class="cart-item-name">${item.name}</div>
+                ${optionsHtml}
                 <div class="cart-item-price">${item.price.toFixed(2)} CHF chacun</div>
             </div>
             <div class="cart-item-controls">
@@ -831,9 +1021,12 @@ class ShoppingCart {
             paymentMethod: checkoutFields.paymentMethod.value
         };
 
-        const orderSummary = this.items.map(item =>
-            `${item.quantity}x ${item.name} - ${(item.price * item.quantity).toFixed(2)} CHF`
-        ).join('\n');
+        const orderSummary = this.items.map(item => {
+            const optionDetails = item.options && item.options.length
+                ? ` (${item.options.map(opt => `${opt.label}: ${opt.value}`).join(', ')})`
+                : '';
+            return `${item.quantity}x ${item.name}${optionDetails} - ${(item.price * item.quantity).toFixed(2)} CHF`;
+        }).join('\n');
 
         const customerSummary =
             `👤 Client : ${customer.firstName} ${customer.lastName}\n` +
@@ -934,12 +1127,132 @@ class ShoppingCart {
     loadCartFromStorage() {
         try {
             const saved = localStorage.getItem('kebab_cart');
-            return saved ? JSON.parse(saved) : [];
+            if (!saved) {
+                return [];
+            }
+
+            const parsed = JSON.parse(saved);
+
+            if (!Array.isArray(parsed)) {
+                return [];
+            }
+
+            return parsed.map(item => ({
+                ...item,
+                options: Array.isArray(item?.options) ? item.options : []
+            }));
         } catch (error) {
             console.warn('⚠️ Impossible de charger le panier:', error);
             return [];
         }
     }
+}
+
+/**
+ * Prépare les éléments de personnalisation des menus
+ */
+function initializeMenuItemOptions() {
+    const menuItems = document.querySelectorAll('.menu-item[data-has-options="true"]');
+
+    menuItems.forEach(menuItem => {
+        const optionsWrapper = menuItem.querySelector('.menu-item-options');
+        if (!optionsWrapper) {
+            return;
+        }
+
+        const hint = optionsWrapper.querySelector('.menu-item-options-hint');
+
+        if (hint && !hint.dataset.defaultHint) {
+            hint.dataset.defaultHint = hint.textContent.trim();
+        }
+
+        optionsWrapper.setAttribute('aria-hidden', 'true');
+
+        const optionGroups = Array.from(optionsWrapper.querySelectorAll('.menu-option'));
+
+        optionGroups.forEach(option => {
+            const buttons = Array.from(option.querySelectorAll('.menu-option-button'));
+            const selectionType = option.dataset.selectionType || 'single';
+            const max = parseInt(option.dataset.max, 10);
+            const maxSelections = Number.isFinite(max) && max > 0
+                ? max
+                : (selectionType === 'multiple' ? buttons.length : 1);
+
+            buttons.forEach(button => {
+                button.type = 'button';
+                button.setAttribute('aria-pressed', 'false');
+
+                button.addEventListener('click', () => {
+                    optionsWrapper.classList.add('menu-item-options--visible');
+                    optionsWrapper.setAttribute('aria-hidden', 'false');
+
+                    const isSelected = button.classList.contains('menu-option-button--selected');
+
+                    if (selectionType === 'single') {
+                        if (isSelected) {
+                            button.classList.remove('menu-option-button--selected');
+                            button.setAttribute('aria-pressed', 'false');
+                        } else {
+                            buttons.forEach(btn => {
+                                btn.classList.remove('menu-option-button--selected');
+                                btn.setAttribute('aria-pressed', 'false');
+                            });
+                            button.classList.add('menu-option-button--selected');
+                            button.setAttribute('aria-pressed', 'true');
+                        }
+                    } else {
+                        if (isSelected) {
+                            button.classList.remove('menu-option-button--selected');
+                            button.setAttribute('aria-pressed', 'false');
+                        } else {
+                            const currentSelection = option.querySelectorAll('.menu-option-button--selected').length;
+                            if (currentSelection >= maxSelections) {
+                                option.classList.add('menu-option--error');
+                                if (hint) {
+                                    const limitMessage = option.dataset.limitMessage || `Vous pouvez sélectionner jusqu'à ${maxSelections} options.`;
+                                    hint.textContent = limitMessage;
+                                    hint.classList.add('menu-item-options-hint--error');
+                                }
+                                optionsWrapper.classList.add('menu-item-options--error');
+                                return;
+                            }
+                            button.classList.add('menu-option-button--selected');
+                            button.setAttribute('aria-pressed', 'true');
+                        }
+                    }
+
+                    option.classList.remove('menu-option--error');
+
+                    if (hint) {
+                        const defaultHint = hint.dataset.defaultHint || hint.textContent;
+                        hint.textContent = defaultHint;
+                        hint.classList.remove('menu-item-options-hint--error');
+                    }
+
+                    optionsWrapper.classList.remove('menu-item-options--error');
+                });
+            });
+        });
+
+        const selects = Array.from(optionsWrapper.querySelectorAll('select[data-required="true"]'));
+        selects.forEach(select => {
+            select.addEventListener('focus', () => {
+                optionsWrapper.classList.add('menu-item-options--visible');
+                optionsWrapper.setAttribute('aria-hidden', 'false');
+            });
+
+            select.addEventListener('change', () => {
+                select.classList.remove('menu-option-select--error');
+                optionsWrapper.classList.remove('menu-item-options--error');
+
+                if (hint) {
+                    const defaultHint = hint.dataset.defaultHint || hint.textContent;
+                    hint.textContent = defaultHint;
+                    hint.classList.remove('menu-item-options-hint--error');
+                }
+            });
+        });
+    });
 }
 
 /* ========================================
@@ -963,6 +1276,8 @@ function init() {
         new FormValidator(contactForm);
     }
     
+    initializeMenuItemOptions();
+
     // Initialiser le système de panier
     window.shoppingCart = new ShoppingCart();
     
