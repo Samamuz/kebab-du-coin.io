@@ -547,7 +547,29 @@ class ShoppingCart {
                 }
 
                 const hasOptions = menuItem.dataset.hasOptions === 'true';
+                const optionsWrapper = menuItem.querySelector('.menu-item-options');
                 let optionData = { options: [], isComplete: true };
+
+                if (hasOptions && optionsWrapper && optionsWrapper.dataset.stepMode === 'enabled') {
+                    const stepper = optionsWrapper._stepper;
+                    const isComplete = optionsWrapper.dataset.stepComplete === 'true';
+
+                    if (!isComplete) {
+                        if (stepper) {
+                            if (optionsWrapper.classList.contains('menu-item-options--visible')) {
+                                stepper.open();
+                                stepper.focusStep();
+                            } else {
+                                stepper.start();
+                            }
+                        } else {
+                            optionsWrapper.classList.add('menu-item-options--visible');
+                            optionsWrapper.setAttribute('aria-hidden', 'false');
+                            menuItem.classList.add('menu-item--configuring');
+                        }
+                        return;
+                    }
+                }
 
                 if (hasOptions) {
                     optionData = this.collectMenuItemOptions(menuItem);
@@ -591,7 +613,8 @@ class ShoppingCart {
             wrapper: optionsWrapper,
             selects: [],
             optionGroups: [],
-            hint: null
+            hint: null,
+            menuItem
         };
 
         if (!optionsWrapper) {
@@ -609,6 +632,23 @@ class ShoppingCart {
 
         const optionGroups = Array.from(optionsWrapper.querySelectorAll('.menu-option'));
         result.optionGroups = optionGroups;
+
+        const isStepped = optionsWrapper.dataset.stepMode === 'enabled';
+        if (isStepped && optionsWrapper.dataset.stepComplete !== 'true') {
+            optionsWrapper.classList.add('menu-item-options--error');
+            const stepper = optionsWrapper._stepper;
+            if (stepper) {
+                stepper.open();
+                stepper.focusStep();
+            }
+            if (hint) {
+                const stepHint = hint.dataset.stepHint || hint.dataset.defaultHint || hint.textContent;
+                hint.textContent = stepHint;
+                hint.classList.add('menu-item-options-hint--error');
+            }
+            result.isComplete = false;
+            return result;
+        }
 
         if (optionGroups.length > 0) {
             optionGroups.forEach(option => {
@@ -712,7 +752,7 @@ class ShoppingCart {
      * @param {Object} optionData - Données des options collectées
      */
     resetMenuItemOptions(optionData) {
-        const { selects = [], optionGroups = [], wrapper, hint } = optionData;
+        const { selects = [], optionGroups = [], wrapper, hint, menuItem } = optionData;
 
         selects.forEach(select => {
             if (select.querySelector('option[value=""]')) {
@@ -725,6 +765,7 @@ class ShoppingCart {
 
         optionGroups.forEach(option => {
             option.classList.remove('menu-option--error');
+            option.classList.remove('menu-option--active');
             option.querySelectorAll('.menu-option-button').forEach(button => {
                 button.classList.remove('menu-option-button--selected');
                 button.setAttribute('aria-pressed', 'false');
@@ -733,14 +774,24 @@ class ShoppingCart {
 
         if (wrapper) {
             wrapper.classList.remove('menu-item-options--error');
-            wrapper.classList.remove('menu-item-options--visible');
-            wrapper.setAttribute('aria-hidden', 'true');
+            wrapper.dataset.stepComplete = 'false';
+
+            if (wrapper._stepper && typeof wrapper._stepper.reset === 'function') {
+                wrapper._stepper.reset();
+            } else {
+                wrapper.classList.remove('menu-item-options--visible');
+                wrapper.setAttribute('aria-hidden', 'true');
+            }
         }
 
         if (hint) {
             const defaultHint = hint.dataset.defaultHint || hint.textContent;
             hint.textContent = defaultHint;
             hint.classList.remove('menu-item-options-hint--error');
+        }
+
+        if (menuItem) {
+            menuItem.classList.remove('menu-item--configuring', 'menu-item--ready');
         }
     }
 
@@ -933,14 +984,12 @@ class ShoppingCart {
                     <button class="quantity-btn" data-action="increase" data-item-id="${item.id}">+</button>
                 </div>
                 <div class="cart-item-total">${itemTotal} CHF</div>
-                <button class="remove-item" data-item-id="${item.id}">&times;</button>
             </div>
         `;
         
         // Événements pour les contrôles
         const decreaseBtn = itemDiv.querySelector('[data-action="decrease"]');
         const increaseBtn = itemDiv.querySelector('[data-action="increase"]');
-        const removeBtn = itemDiv.querySelector('.remove-item');
         
         decreaseBtn.addEventListener('click', () => {
             this.updateQuantity(item.id, item.quantity - 1);
@@ -948,10 +997,6 @@ class ShoppingCart {
         
         increaseBtn.addEventListener('click', () => {
             this.updateQuantity(item.id, item.quantity + 1);
-        });
-        
-        removeBtn.addEventListener('click', () => {
-            this.removeItem(item.id);
         });
         
         return itemDiv;
@@ -1167,8 +1212,16 @@ function initializeMenuItemOptions() {
         }
 
         optionsWrapper.setAttribute('aria-hidden', 'true');
+        optionsWrapper.dataset.stepComplete = 'false';
 
         const optionGroups = Array.from(optionsWrapper.querySelectorAll('.menu-option'));
+
+        if (optionGroups.length > 0) {
+            const stepper = createMenuOptionStepper(menuItem, optionsWrapper, optionGroups, hint);
+            if (stepper) {
+                optionsWrapper._stepper = stepper;
+            }
+        }
 
         optionGroups.forEach(option => {
             const buttons = Array.from(option.querySelectorAll('.menu-option-button'));
@@ -1185,6 +1238,10 @@ function initializeMenuItemOptions() {
                 button.addEventListener('click', () => {
                     optionsWrapper.classList.add('menu-item-options--visible');
                     optionsWrapper.setAttribute('aria-hidden', 'false');
+                    menuItem.classList.add('menu-item--configuring');
+                    if (optionsWrapper._stepper && typeof optionsWrapper._stepper.open === 'function') {
+                        optionsWrapper._stepper.open();
+                    }
 
                     const isSelected = button.classList.contains('menu-option-button--selected');
 
@@ -1230,6 +1287,10 @@ function initializeMenuItemOptions() {
                     }
 
                     optionsWrapper.classList.remove('menu-item-options--error');
+
+                    if (optionsWrapper._stepper && typeof optionsWrapper._stepper.handleSelectionChange === 'function') {
+                        optionsWrapper._stepper.handleSelectionChange(option);
+                    }
                 });
             });
         });
@@ -1239,6 +1300,10 @@ function initializeMenuItemOptions() {
             select.addEventListener('focus', () => {
                 optionsWrapper.classList.add('menu-item-options--visible');
                 optionsWrapper.setAttribute('aria-hidden', 'false');
+                menuItem.classList.add('menu-item--configuring');
+                if (optionsWrapper._stepper && typeof optionsWrapper._stepper.open === 'function') {
+                    optionsWrapper._stepper.open();
+                }
             });
 
             select.addEventListener('change', () => {
@@ -1250,9 +1315,309 @@ function initializeMenuItemOptions() {
                     hint.textContent = defaultHint;
                     hint.classList.remove('menu-item-options-hint--error');
                 }
+
+                if (optionsWrapper._stepper && typeof optionsWrapper._stepper.markDirty === 'function') {
+                    optionsWrapper._stepper.markDirty();
+                }
             });
         });
     });
+}
+
+function createMenuOptionStepper(menuItem, optionsWrapper, optionGroups, hint) {
+    if (!optionsWrapper || !optionGroups.length) {
+        return null;
+    }
+
+    optionsWrapper.classList.add('menu-item-options--stepped');
+    optionsWrapper.dataset.stepMode = 'enabled';
+
+    if (hint) {
+        if (!hint.dataset.stepHint) {
+            hint.dataset.stepHint = 'Complétez chaque étape pour continuer.';
+        }
+        if (!hint.dataset.completeHint) {
+            hint.dataset.completeHint = 'Étapes terminées ! Cliquez sur "Ajouter au panier" pour confirmer.';
+        }
+    }
+
+    const controls = document.createElement('div');
+    controls.className = 'menu-options-controls';
+
+    const prevBtn = document.createElement('button');
+    prevBtn.type = 'button';
+    prevBtn.className = 'menu-options-prev';
+    prevBtn.textContent = 'Précédent';
+
+    const nextBtn = document.createElement('button');
+    nextBtn.type = 'button';
+    nextBtn.className = 'menu-options-next';
+    nextBtn.textContent = optionGroups.length === 1 ? 'Valider' : 'Suivant';
+
+    controls.append(prevBtn, nextBtn);
+
+    const addToCartButton = menuItem.querySelector('.btn-add-to-cart');
+
+    function setAddButtonDisabled(disabled) {
+        if (!addToCartButton) {
+            return;
+        }
+        addToCartButton.disabled = disabled;
+        addToCartButton.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+    }
+
+    function focusAddButton() {
+        if (!addToCartButton) {
+            return;
+        }
+        requestAnimationFrame(() => addToCartButton.focus());
+    }
+
+    if (hint) {
+        optionsWrapper.insertBefore(controls, hint);
+    } else {
+        optionsWrapper.appendChild(controls);
+    }
+
+    optionGroups.forEach((group, index) => {
+        group.dataset.stepIndex = String(index);
+        group.classList.toggle('menu-option--active', index === 0);
+        group.setAttribute('aria-hidden', index === 0 ? 'false' : 'true');
+    });
+
+    optionsWrapper.dataset.activeStep = '0';
+    setAddButtonDisabled(false);
+
+    const state = {
+        currentStep: 0,
+        totalSteps: optionGroups.length,
+        completed: false
+    };
+
+    function clearStepError() {
+        optionsWrapper.classList.remove('menu-item-options--error');
+        if (!hint) {
+            return;
+        }
+        const defaultHint = hint.dataset.defaultHint || hint.textContent;
+        hint.textContent = defaultHint;
+        hint.classList.remove('menu-item-options-hint--error');
+    }
+
+    function showStepError(message) {
+        if (!hint) {
+            return;
+        }
+        hint.textContent = message;
+        hint.classList.add('menu-item-options-hint--error');
+    }
+
+    function setStep(step) {
+        state.currentStep = step;
+        optionsWrapper.dataset.activeStep = String(step);
+        optionGroups.forEach((group, index) => {
+            const isActive = index === step;
+            group.classList.toggle('menu-option--active', isActive);
+            group.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+        });
+        prevBtn.disabled = step === 0;
+        if (!state.completed) {
+            nextBtn.textContent = step === state.totalSteps - 1 ? 'Valider' : 'Suivant';
+        }
+        clearStepError();
+    }
+
+    function validateStep(stepIndex) {
+        const group = optionGroups[stepIndex];
+        if (!group) {
+            return true;
+        }
+
+        const selectionType = group.dataset.selectionType || 'single';
+        const required = group.dataset.required !== 'false';
+        const buttons = Array.from(group.querySelectorAll('.menu-option-button'));
+        const selectedButtons = buttons.filter(btn => btn.classList.contains('menu-option-button--selected'));
+        const max = parseInt(group.dataset.max, 10);
+        const maxSelections = Number.isFinite(max) && max > 0
+            ? max
+            : (selectionType === 'multiple' ? buttons.length : 1);
+
+        if (selectedButtons.length > maxSelections) {
+            group.classList.add('menu-option--error');
+            const limitMessage = group.dataset.limitMessage || `Vous pouvez sélectionner jusqu'à ${maxSelections} options.`;
+            showStepError(limitMessage);
+            optionsWrapper.classList.add('menu-item-options--error');
+            return false;
+        }
+
+        if (required && selectedButtons.length === 0) {
+            group.classList.add('menu-option--error');
+            const message = group.dataset.errorMessage || hint?.dataset.errorHint || 'Merci de compléter cette étape.';
+            showStepError(message);
+            optionsWrapper.classList.add('menu-item-options--error');
+            const firstButton = buttons[0];
+            if (firstButton) {
+                firstButton.focus();
+            }
+            return false;
+        }
+
+        group.classList.remove('menu-option--error');
+        clearStepError();
+        return true;
+    }
+
+    function focusStep(step = state.currentStep) {
+        const group = optionGroups[step];
+        if (!group) {
+            return;
+        }
+        const firstInteractive = group.querySelector('.menu-option-button, select, input');
+        if (firstInteractive && typeof firstInteractive.focus === 'function') {
+            firstInteractive.focus();
+        }
+    }
+
+    function complete() {
+        if (!validateStep(state.currentStep)) {
+            return false;
+        }
+
+        state.completed = true;
+        optionsWrapper.dataset.stepComplete = 'true';
+        menuItem.classList.add('menu-item--ready');
+        nextBtn.textContent = 'Étape validée';
+        nextBtn.disabled = true;
+        nextBtn.classList.add('menu-options-next--completed');
+        clearStepError();
+        setAddButtonDisabled(false);
+        focusAddButton();
+        if (hint) {
+            const completeHint = hint.dataset.completeHint || hint.dataset.defaultHint || hint.textContent;
+            hint.textContent = completeHint;
+        }
+        return true;
+    }
+
+    function advance() {
+        if (!validateStep(state.currentStep)) {
+            return false;
+        }
+
+        if (state.currentStep === state.totalSteps - 1) {
+            return complete();
+        }
+
+        const nextStepIndex = state.currentStep + 1;
+        state.completed = false;
+        optionsWrapper.dataset.stepComplete = 'false';
+        menuItem.classList.remove('menu-item--ready');
+        nextBtn.disabled = false;
+        nextBtn.classList.remove('menu-options-next--completed');
+        setStep(nextStepIndex);
+        requestAnimationFrame(() => focusStep(nextStepIndex));
+        return true;
+    }
+
+    prevBtn.addEventListener('click', () => {
+        if (state.currentStep === 0) {
+            return;
+        }
+        state.completed = false;
+        optionsWrapper.dataset.stepComplete = 'false';
+        menuItem.classList.remove('menu-item--ready');
+        nextBtn.disabled = false;
+        nextBtn.classList.remove('menu-options-next--completed');
+        setStep(state.currentStep - 1);
+        requestAnimationFrame(() => focusStep());
+    });
+
+    nextBtn.addEventListener('click', () => {
+        if (state.completed) {
+            return;
+        }
+        if (state.currentStep === state.totalSteps - 1) {
+            complete();
+        } else {
+            advance();
+        }
+    });
+
+    // Initial UI state
+    prevBtn.disabled = true;
+
+    return {
+        start() {
+            state.currentStep = 0;
+            state.completed = false;
+            optionsWrapper.dataset.stepComplete = 'false';
+            menuItem.classList.add('menu-item--configuring');
+            optionsWrapper.classList.add('menu-item-options--visible');
+            optionsWrapper.setAttribute('aria-hidden', 'false');
+            nextBtn.disabled = false;
+            nextBtn.classList.remove('menu-options-next--completed');
+            prevBtn.disabled = true;
+            setStep(0);
+            clearStepError();
+            setAddButtonDisabled(true);
+            requestAnimationFrame(() => focusStep(0));
+        },
+        open() {
+            optionsWrapper.classList.add('menu-item-options--visible');
+            optionsWrapper.setAttribute('aria-hidden', 'false');
+            menuItem.classList.add('menu-item--configuring');
+            if (!state.completed) {
+                setAddButtonDisabled(true);
+            }
+        },
+        reset() {
+            state.currentStep = 0;
+            state.completed = false;
+            optionsWrapper.dataset.stepComplete = 'false';
+            menuItem.classList.remove('menu-item--configuring', 'menu-item--ready');
+            optionsWrapper.classList.remove('menu-item-options--visible');
+            optionsWrapper.setAttribute('aria-hidden', 'true');
+            nextBtn.disabled = false;
+            nextBtn.classList.remove('menu-options-next--completed');
+            prevBtn.disabled = true;
+            setStep(0);
+            clearStepError();
+            setAddButtonDisabled(false);
+        },
+        markDirty() {
+            setAddButtonDisabled(true);
+            if (state.completed) {
+                state.completed = false;
+                optionsWrapper.dataset.stepComplete = 'false';
+                nextBtn.disabled = false;
+                nextBtn.classList.remove('menu-options-next--completed');
+                nextBtn.textContent = state.currentStep === state.totalSteps - 1 ? 'Valider' : 'Suivant';
+                menuItem.classList.remove('menu-item--ready');
+                clearStepError();
+            }
+        },
+        handleSelectionChange(group) {
+            this.markDirty();
+            if (!group) {
+                return;
+            }
+
+            const stepIndex = Number(group.dataset.stepIndex);
+            if (!Number.isFinite(stepIndex) || stepIndex !== state.currentStep) {
+                return;
+            }
+
+            if (state.completed) {
+                return;
+            }
+
+            group.classList.remove('menu-option--error');
+            clearStepError();
+        },
+        focusStep,
+        advance,
+        complete
+    };
 }
 
 /* ========================================
